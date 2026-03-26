@@ -765,12 +765,116 @@ async function validarAgente() {
   }
 }
 
+// 2. Función mejorada para cargar clientes
 async function cargarClientesDelAgente() {
-  // Esta función la completaremos después
-  const resultDiv = document.getElementById("agente-result");
-  resultDiv.innerHTML += `<p style="color:var(--muted); margin-top:10px;">(Próximamente: lista de clientes)</p>`;
-}
+  if (!agenteActual) {
+    toast("No hay agente seleccionado", "err");
+    return;
+  }
 
+  const resultDiv = document.getElementById("agente-result");
+  resultDiv.innerHTML = `
+    <p style="color:var(--muted); text-align:center; margin-bottom:15px;">
+      Cargando clientes de <strong>${agenteActual.nombre}</strong>...
+    </p>`;
+
+  try {
+    const r = await fetch(SCRIPT_URL + "?action=clientes-agente&codagente=" + encodeURIComponent(agenteActual.codagente));
+    const data = await r.json();
+
+    if (!data.ok) throw new Error(data.error || "Error desconocido");
+
+    clientesDelAgente = data.clientes || [];
+
+    if (clientesDelAgente.length === 0) {
+      resultDiv.innerHTML = `
+        <p style="color:var(--muted); text-align:center;">
+          El agente <strong>${agenteActual.nombre}</strong> no tiene clientes asignados.
+        </p>`;
+      return;
+    }
+
+    let html = `
+      <p style="margin:10px 0 12px; color:var(--muted); text-align:center;">
+        Clientes de <strong>${agenteActual.nombre}</strong> (${clientesDelAgente.length})
+      </p>
+      <div style="max-height:320px; overflow-y:auto; background:var(--cream); border-radius:14px; padding:10px;">`;
+
+    clientesDelAgente.forEach(cliente => {
+      html += `
+        <div onclick='seleccionarCliente(${JSON.stringify(cliente)})' 
+             style="background:white; margin:8px 0; padding:16px; border-radius:12px; border:1px solid var(--line); cursor:pointer;">
+          <div style="font-weight:600; margin-bottom:6px;">${cliente.nombre}</div>
+          <div style="font-size:0.88rem; color:var(--muted);">
+            ${cliente.telefono1 ? `📞 ${cliente.telefono1}<br>` : ''}
+            ${cliente.email ? `✉️ ${cliente.email}` : 'Sin email registrado'}
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+    resultDiv.innerHTML = html;
+
+  } catch (e) {
+    console.error(e);
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error al cargar los clientes.</p>`;
+  }
+}
+  // 2. Función mejorada para cargar clientes
+async function cargarClientesDelAgente() {
+  if (!agenteActual) {
+    toast("No hay agente seleccionado", "err");
+    return;
+  }
+
+  const resultDiv = document.getElementById("agente-result");
+  resultDiv.innerHTML = `
+    <p style="color:var(--muted); text-align:center; margin-bottom:15px;">
+      Cargando clientes de <strong>${agenteActual.nombre}</strong>...
+    </p>`;
+
+  try {
+    const r = await fetch(SCRIPT_URL + "?action=clientes-agente&codagente=" + encodeURIComponent(agenteActual.codagente));
+    const data = await r.json();
+
+    if (!data.ok) throw new Error(data.error || "Error desconocido");
+
+    clientesDelAgente = data.clientes || [];
+
+    if (clientesDelAgente.length === 0) {
+      resultDiv.innerHTML = `
+        <p style="color:var(--muted); text-align:center;">
+          El agente <strong>${agenteActual.nombre}</strong> no tiene clientes asignados.
+        </p>`;
+      return;
+    }
+
+    let html = `
+      <p style="margin:10px 0 12px; color:var(--muted); text-align:center;">
+        Clientes de <strong>${agenteActual.nombre}</strong> (${clientesDelAgente.length})
+      </p>
+      <div style="max-height:320px; overflow-y:auto; background:var(--cream); border-radius:14px; padding:10px;">`;
+
+    clientesDelAgente.forEach(cliente => {
+      html += `
+        <div onclick='seleccionarCliente(${JSON.stringify(cliente)})' 
+             style="background:white; margin:8px 0; padding:16px; border-radius:12px; border:1px solid var(--line); cursor:pointer;">
+          <div style="font-weight:600; margin-bottom:6px;">${cliente.nombre}</div>
+          <div style="font-size:0.88rem; color:var(--muted);">
+            ${cliente.telefono1 ? `📞 ${cliente.telefono1}<br>` : ''}
+            ${cliente.email ? `✉️ ${cliente.email}` : 'Sin email registrado'}
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+    resultDiv.innerHTML = html;
+
+  } catch (e) {
+    console.error(e);
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error al cargar los clientes.</p>`;
+  }
+}
 function cerrarAgenteModal() {
   document.getElementById("agente-modal").style.display = "none";
 }
