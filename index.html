@@ -728,29 +728,41 @@ async function validarAgente() {
     return;
   }
 
-  resultDiv.innerHTML = `<p style="color:var(--muted); text-align:center;">Validando agente...</p>`;
+  resultDiv.innerHTML = `<p style="color:var(--muted); text-align:center;">Buscando agente...</p>`;
 
   try {
-    const r = await fetch(SCRIPT_URL + "?action=validar-agente&q=" + encodeURIComponent(input));
+    const url = SCRIPT_URL + "?action=validar-agente&q=" + encodeURIComponent(input);
+    console.log("Llamando a:", url);   // ← para debug
+
+    const r = await fetch(url);
     const data = await r.json();
 
+    console.log("Respuesta del servidor:", data);   // ← muy importante
+
     if (!data.ok || !data.agente) {
-      resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Agente no encontrado.<br>Verifica el código o nombre.</p>`;
+      resultDiv.innerHTML = `
+        <p style="color:var(--red); text-align:center;">
+          Agente no encontrado.<br>
+          <small>Probaste con: "${input}"</small>
+        </p>`;
       return;
     }
 
-    // Agente encontrado
+    // Éxito
     resultDiv.innerHTML = `
-      <p style="color:var(--green); text-align:center;">
-        ✓ Agente validado: <strong>${data.agente.nombre}</strong>
+      <p style="color:var(--green); text-align:center; font-weight:500;">
+        ✓ Agente encontrado: <strong>${data.agente.nombre}</strong><br>
+        <small>Código: ${data.agente.codagente}</small>
       </p>
-      <button onclick="cargarClientesDelAgente()" style="margin-top:15px; width:100%; padding:12px; background:var(--gold); color:#1a1714; border:none; border-radius:10px; cursor:pointer;">
-        Ver clientes de este agente
+      <button onclick="cargarClientesDelAgente()" 
+              style="margin-top:15px; width:100%; padding:12px; background:var(--gold); color:#1a1714; border:none; border-radius:10px; font-weight:600; cursor:pointer;">
+        Ver lista de clientes de este agente
       </button>
     `;
+
   } catch (e) {
-    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error de conexión. Intenta nuevamente.</p>`;
-    console.error(e);
+    console.error("Error al validar agente:", e);
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error de conexión con el servidor.</p>`;
   }
 }
 
