@@ -704,8 +704,66 @@ function cerrarVariantes(e) {
   document.body.style.overflow = "";
   varProdActual = null; varColoresActuales = [];
 }
+  //se agrego esto
+function checkout() {
+  if (!carrito.length) {
+    toast("Tu carrito está vacío", "err");
+    return;
+  }
+  
+  // Abrir modal del agente
+  document.getElementById("agente-modal").style.display = "flex";
+  document.getElementById("agente-input").focus();
+}
+  function cerrarAgenteModal() {
+  document.getElementById("agente-modal").style.display = "none";
+}
 
-async function checkout() {
+async function validarAgente() {
+  const input = document.getElementById("agente-input").value.trim();
+  const resultDiv = document.getElementById("agente-result");
+
+  if (!input) {
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Por favor ingresa código o nombre del agente</p>`;
+    return;
+  }
+
+  resultDiv.innerHTML = `<p style="color:var(--muted); text-align:center;">Validando agente...</p>`;
+
+  try {
+    const r = await fetch(SCRIPT_URL + "?action=validar-agente&q=" + encodeURIComponent(input));
+    const data = await r.json();
+
+    if (!data.ok || !data.agente) {
+      resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Agente no encontrado.<br>Verifica el código o nombre.</p>`;
+      return;
+    }
+
+    // Agente encontrado
+    resultDiv.innerHTML = `
+      <p style="color:var(--green); text-align:center;">
+        ✓ Agente validado: <strong>${data.agente.nombre}</strong>
+      </p>
+      <button onclick="cargarClientesDelAgente()" style="margin-top:15px; width:100%; padding:12px; background:var(--gold); color:#1a1714; border:none; border-radius:10px; cursor:pointer;">
+        Ver clientes de este agente
+      </button>
+    `;
+  } catch (e) {
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error de conexión. Intenta nuevamente.</p>`;
+    console.error(e);
+  }
+}
+
+async function cargarClientesDelAgente() {
+  // Esta función la completaremos después
+  const resultDiv = document.getElementById("agente-result");
+  resultDiv.innerHTML += `<p style="color:var(--muted); margin-top:10px;">(Próximamente: lista de clientes)</p>`;
+}
+
+function cerrarAgenteModal() {
+  document.getElementById("agente-modal").style.display = "none";
+}
+/*async function checkout() {
   if (!carrito.length) { toast("Tu carrito está vacío", "err"); return; }
   const nombre = document.getElementById("f-nombre").value.trim();
   const tel    = document.getElementById("f-tel").value.trim();
@@ -736,7 +794,7 @@ async function checkout() {
     btn.disabled = false;
     btn.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Confirmar pedido`;
   }
-}
+}*/
 
 function mostrarConfirm(id, payload) {
   document.getElementById("confirm-id").textContent = id;
