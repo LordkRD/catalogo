@@ -391,7 +391,8 @@ const SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbzCkESwINvPvy_abDj
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
-
+let agenteActual = null;           // ← Esta línea es importante
+let clientesDelAgente = [];        // ← Esta también
 let PRODS = [], carrito = [], catActual = "Todos", busqueda = "", vistaActual = "grid";
 
 document.getElementById("banner-text").textContent = BANNER_TEXTO;
@@ -714,10 +715,7 @@ function checkout() {
   document.getElementById("agente-modal").style.display = "flex";
   document.getElementById("agente-input").focus();
 }
-  function cerrarAgenteModal() {
-  document.getElementById("agente-modal").style.display = "none";
-}
-
+  
 async function validarAgente() {
   const input = document.getElementById("agente-input").value.trim();
   const resultDiv = document.getElementById("agente-result");
@@ -764,19 +762,14 @@ async function validarAgente() {
     resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error de conexión con el servidor.</p>`;
   }
 }
-
-// 2. Función mejorada para cargar clientes
-async function cargarClientesDelAgente() {
+  async function cargarClientesDelAgente() {
   if (!agenteActual) {
     toast("No hay agente seleccionado", "err");
     return;
   }
 
   const resultDiv = document.getElementById("agente-result");
-  resultDiv.innerHTML = `
-    <p style="color:var(--muted); text-align:center; margin-bottom:15px;">
-      Cargando clientes de <strong>${agenteActual.nombre}</strong>...
-    </p>`;
+  resultDiv.innerHTML = `<p style="color:var(--muted); text-align:center;">Cargando clientes...</p>`;
 
   try {
     const r = await fetch(SCRIPT_URL + "?action=clientes-agente&codagente=" + encodeURIComponent(agenteActual.codagente));
@@ -787,28 +780,19 @@ async function cargarClientesDelAgente() {
     clientesDelAgente = data.clientes || [];
 
     if (clientesDelAgente.length === 0) {
-      resultDiv.innerHTML = `
-        <p style="color:var(--muted); text-align:center;">
-          El agente <strong>${agenteActual.nombre}</strong> no tiene clientes asignados.
-        </p>`;
+      resultDiv.innerHTML = `<p style="color:var(--muted); text-align:center;">Este agente no tiene clientes asignados.</p>`;
       return;
     }
 
-    let html = `
-      <p style="margin:10px 0 12px; color:var(--muted); text-align:center;">
-        Clientes de <strong>${agenteActual.nombre}</strong> (${clientesDelAgente.length})
-      </p>
-      <div style="max-height:320px; overflow-y:auto; background:var(--cream); border-radius:14px; padding:10px;">`;
+    let html = `<p style="margin:12px 0 10px; color:var(--muted); text-align:center;">Clientes (${clientesDelAgente.length})</p>`;
+    html += `<div style="max-height:300px; overflow-y:auto; background:var(--cream); border-radius:12px; padding:8px;">`;
 
     clientesDelAgente.forEach(cliente => {
       html += `
         <div onclick='seleccionarCliente(${JSON.stringify(cliente)})' 
-             style="background:white; margin:8px 0; padding:16px; border-radius:12px; border:1px solid var(--line); cursor:pointer;">
-          <div style="font-weight:600; margin-bottom:6px;">${cliente.nombre}</div>
-          <div style="font-size:0.88rem; color:var(--muted);">
-            ${cliente.telefono1 ? `📞 ${cliente.telefono1}<br>` : ''}
-            ${cliente.email ? `✉️ ${cliente.email}` : 'Sin email registrado'}
-          </div>
+             style="padding:14px; margin:6px 0; background:white; border-radius:10px; cursor:pointer; border:1px solid var(--line);">
+          <strong>${cliente.nombre}</strong><br>
+          <small style="color:var(--muted);">${cliente.telefono1 || ''} • ${cliente.email || ''}</small>
         </div>`;
     });
 
@@ -816,100 +800,30 @@ async function cargarClientesDelAgente() {
     resultDiv.innerHTML = html;
 
   } catch (e) {
-    console.error(e);
-    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error al cargar los clientes.</p>`;
+    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error al cargar clientes.</p>`;
   }
 }
-  // 2. Función mejorada para cargar clientes
-async function cargarClientesDelAgente() {
-  if (!agenteActual) {
-    toast("No hay agente seleccionado", "err");
-    return;
-  }
 
-  const resultDiv = document.getElementById("agente-result");
-  resultDiv.innerHTML = `
-    <p style="color:var(--muted); text-align:center; margin-bottom:15px;">
-      Cargando clientes de <strong>${agenteActual.nombre}</strong>...
-    </p>`;
+// ── Seleccionar cliente ───────────────────────────────────────
+function seleccionarCliente(cliente) {
+  if (!cliente) return;
 
-  try {
-    const r = await fetch(SCRIPT_URL + "?action=clientes-agente&codagente=" + encodeURIComponent(agenteActual.codagente));
-    const data = await r.json();
+  document.getElementById("f-nombre").value = cliente.nombre || "";
+  document.getElementById("f-tel").value    = cliente.telefono1 || "";
+  document.getElementById("f-email").value  = cliente.email || "";
 
-    if (!data.ok) throw new Error(data.error || "Error desconocido");
+  cerrarAgenteModal();
+  toast(`Cliente seleccionado: ${cliente.nombre}`, "ok");
 
-    clientesDelAgente = data.clientes || [];
-
-    if (clientesDelAgente.length === 0) {
-      resultDiv.innerHTML = `
-        <p style="color:var(--muted); text-align:center;">
-          El agente <strong>${agenteActual.nombre}</strong> no tiene clientes asignados.
-        </p>`;
-      return;
-    }
-
-    let html = `
-      <p style="margin:10px 0 12px; color:var(--muted); text-align:center;">
-        Clientes de <strong>${agenteActual.nombre}</strong> (${clientesDelAgente.length})
-      </p>
-      <div style="max-height:320px; overflow-y:auto; background:var(--cream); border-radius:14px; padding:10px;">`;
-
-    clientesDelAgente.forEach(cliente => {
-      html += `
-        <div onclick='seleccionarCliente(${JSON.stringify(cliente)})' 
-             style="background:white; margin:8px 0; padding:16px; border-radius:12px; border:1px solid var(--line); cursor:pointer;">
-          <div style="font-weight:600; margin-bottom:6px;">${cliente.nombre}</div>
-          <div style="font-size:0.88rem; color:var(--muted);">
-            ${cliente.telefono1 ? `📞 ${cliente.telefono1}<br>` : ''}
-            ${cliente.email ? `✉️ ${cliente.email}` : 'Sin email registrado'}
-          </div>
-        </div>`;
-    });
-
-    html += `</div>`;
-    resultDiv.innerHTML = html;
-
-  } catch (e) {
-    console.error(e);
-    resultDiv.innerHTML = `<p style="color:var(--red); text-align:center;">Error al cargar los clientes.</p>`;
-  }
+  setTimeout(() => {
+    procesarPedidoConAgente();
+  }, 400);
 }
+
+
 function cerrarAgenteModal() {
   document.getElementById("agente-modal").style.display = "none";
 }
-/*async function checkout() {
-  if (!carrito.length) { toast("Tu carrito está vacío", "err"); return; }
-  const nombre = document.getElementById("f-nombre").value.trim();
-  const tel    = document.getElementById("f-tel").value.trim();
-  if (!nombre || !tel) { toast("Nombre y teléfono son obligatorios", "err"); return; }
-  const btn = document.getElementById("ok-btn");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spin"></span> Enviando…`;
-  const payload = {
-    action: "pedido", nombre, telefono: tel,
-    email:  document.getElementById("f-email").value.trim(),
-    nota:   document.getElementById("f-nota").value.trim(),
-    items:  carrito.map(c => ({ id: c.id, nombre: c.nombre, variante: c.variante || "", precio: c.precio, qty: c.qty, subtotal: c.precio * c.qty })),
-    total:  carrito.reduce((s, c) => s + c.precio * c.qty, 0)
-  };
-  try {
-    const r    = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-    const data = await r.json();
-    if (!data.ok) throw new Error(data.error || "Error desconocido");
-    mostrarConfirm(data.id, payload);
-    carrito = [];
-    actualizarPanel();
-    cerrarCarrito();
-    renderGrid();
-    ["f-nombre","f-tel","f-email","f-nota"].forEach(id => document.getElementById(id).value = "");
-  } catch (e) {
-    toast("Error al enviar: " + e.message, "err");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Confirmar pedido`;
-  }
-}*/
 
 function mostrarConfirm(id, payload) {
   document.getElementById("confirm-id").textContent = id;
