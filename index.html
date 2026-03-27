@@ -493,6 +493,43 @@ async function validarAgenteFacturaScripts(baseUrl, usuario, clave) {
   return { ok: false, error: ultimoError };
 }
 
+async function validarSesionPersistida(sesion) {
+  if (!sesion?.baseUrl || !sesion?.user || !sesion?.token) {
+    return { ok: false, error: "La sesión guardada no es válida. Inicia sesión nuevamente." };
+  }
+
+  const endpoint = getBaseUrl(sesion.baseUrl) + "/api/3/me";
+  const intentos = [
+    { headers: { Authorization: "Bearer " + sesion.token } },
+    { headers: { "X-Auth-Token": sesion.token } },
+    { headers: { Token: sesion.token } }
+  ];
+
+  let ultimoError = "No se pudo validar la sesión guardada.";
+  for (const intento of intentos) {
+    try {
+      const r = await fetch(endpoint, { method: "GET", headers: intento.headers });
+      let data = {};
+      try { data = await r.json(); } catch (_) {}
+      if (r.ok) {
+        const usuarioRemoto = data.nick || data.username || data.user || data.email || "";
+        if (usuarioRemoto && usuarioRemoto !== sesion.user) {
+          return { ok: false, error: "La sesión guardada no coincide con el agente autenticado." };
+        }
+        return { ok: true };
+      }
+      if (r.status === 401 || r.status === 403) {
+        return { ok: false, error: "La sesión guardada expiró o no es válida." };
+      }
+      ultimoError = data.error || data.message || `Error ${r.status} al validar sesión.`;
+    } catch (_) {
+      ultimoError = "No se pudo conectar con FacturaScripts para validar la sesión.";
+    }
+  }
+
+  return { ok: false, error: ultimoError };
+}
+
 async function loginFacturaScripts(event) {
   event.preventDefault();
   const fsUrl = document.getElementById("fs-url").value.trim();
@@ -892,14 +929,28 @@ function toast(msg, tipo = "") {
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); } });
 
-(() => {
+(async () => {
+  const errorEl = document.getElementById("login-error");
   const saved = localStorage.getItem("fs_agent_session");
   if (saved) {
     try { agenteSesion = JSON.parse(saved); } catch (_) { agenteSesion = null; }
   }
-  if (agenteSesion?.user) {
+  if (agenteSesion?.baseUrl) {
     document.getElementById("fs-url").value = agenteSesion.baseUrl || "";
+  }
+  if (agenteSesion?.user) {
     document.getElementById("fs-user").value = agenteSesion.user || "";
+  }
+  if (agenteSesion) {
+    errorEl.textContent = "Verificando sesión guardada…";
+    const validacion = await validarSesionPersistida(agenteSesion);
+    if (!validacion.ok) {
+      localStorage.removeItem("fs_agent_session");
+      agenteSesion = null;
+      errorEl.textContent = validacion.error;
+      return;
+    }
+    errorEl.textContent = "";
     mostrarApp();
     iniciarCatalogo();
   }
