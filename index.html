@@ -309,7 +309,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
       <button id="login-btn" type="submit">Entrar</button>
       <div id="login-error"></div>
     </form>
-    <p class="login-help">Si el acceso falla, verifica la URL base de tu instalación de FacturaScripts y que ese agente tenga permiso para entrar.</p>
+    <p class="login-help">Si el acceso falla, verifica la URL base de tu instalación de FacturaScripts y que ese agente tenga permiso para entrar. Si usas Apps Script como puente, configura la acción <strong>validar_agente</strong> para validar el usuario/clave.</p>
   </div>
 </div>
 
@@ -461,6 +461,12 @@ function mostrarApp() {
   }
 }
 
+function mostrarLogin(mensaje = "") {
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app-shell").style.display = "none";
+  document.getElementById("login-error").textContent = mensaje;
+}
+
 function cerrarSesion() {
   localStorage.removeItem("fs_agent_session");
   location.reload();
@@ -490,6 +496,71 @@ async function validarAgenteFacturaScripts(baseUrl, usuario, clave) {
     }
   }
 
+  const validacionProxy = await validarAgenteViaAppsScript(baseUrl, usuario, clave);
+  if (validacionProxy.ok) return validacionProxy;
+  if (validacionProxy.error) ultimoError = validacionProxy.error;
+
+  return { ok: false, error: ultimoError };
+}
+
+async function validarAgenteViaAppsScript(baseUrl, usuario, clave) {
+  try {
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "validar_agente",
+        baseUrl: getBaseUrl(baseUrl),
+        usuario,
+        clave
+      })
+    });
+    let data = {};
+    try { data = await r.json(); } catch (_) {}
+    if (r.ok && data.ok) {
+      return { ok: true, token: data.token || data.jwt || "" };
+    }
+    if (data && (data.error || data.message)) {
+      return { ok: false, error: data.error || data.message };
+    }
+  } catch (_) {}
+  return { ok: false };
+}
+
+async function validarSesionPersistida(sesion) {
+  if (!sesion?.baseUrl || !sesion?.user || !sesion?.token) {
+    return { ok: false, error: "La sesión guardada no es válida. Inicia sesión nuevamente." };
+  }
+
+  const endpoint = getBaseUrl(sesion.baseUrl) + "/api/3/me";
+  const intentos = [
+    { headers: { Authorization: "Bearer " + sesion.token } },
+    { headers: { "X-Auth-Token": sesion.token } },
+    { headers: { Token: sesion.token } }
+  ];
+
+  let ultimoError = "No se pudo validar la sesión guardada.";
+  for (const intento of intentos) {
+    try {
+      const r = await fetch(endpoint, { method: "GET", headers: intento.headers });
+      let data = {};
+      try { data = await r.json(); } catch (_) {}
+      if (r.ok) {
+        const usuarioRemoto = data.nick || data.username || data.user || data.email || "";
+        if (usuarioRemoto && usuarioRemoto !== sesion.user) {
+          return { ok: false, error: "La sesión guardada no coincide con el agente autenticado." };
+        }
+        return { ok: true };
+      }
+      if (r.status === 401 || r.status === 403) {
+        return { ok: false, error: "La sesión guardada expiró o no es válida." };
+      }
+      ultimoError = data.error || data.message || `Error ${r.status} al validar sesión.`;
+    } catch (_) {
+      ultimoError = "No se pudo conectar con FacturaScripts para validar la sesión.";
+    }
+  }
+
   return { ok: false, error: ultimoError };
 }
 
@@ -507,7 +578,7 @@ async function loginFacturaScripts(event) {
 
   const validacion = await validarAgenteFacturaScripts(fsUrl, user, pass);
   if (!validacion.ok) {
-    errorEl.textContent = validacion.error;
+    mostrarLogin(validacion.error);
     btn.disabled = false;
     btn.textContent = "Entrar";
     return;
@@ -892,14 +963,27 @@ function toast(msg, tipo = "") {
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); } });
 
-(() => {
+(async () => {
+  mostrarLogin();
   const saved = localStorage.getItem("fs_agent_session");
   if (saved) {
     try { agenteSesion = JSON.parse(saved); } catch (_) { agenteSesion = null; }
   }
-  if (agenteSesion?.user) {
+  if (agenteSesion?.baseUrl) {
     document.getElementById("fs-url").value = agenteSesion.baseUrl || "";
+  }
+  if (agenteSesion?.user) {
     document.getElementById("fs-user").value = agenteSesion.user || "";
+  }
+  if (agenteSesion) {
+    mostrarLogin("Verificando sesión guardada…");
+    const validacion = await validarSesionPersistida(agenteSesion);
+    if (!validacion.ok) {
+      localStorage.removeItem("fs_agent_session");
+      agenteSesion = null;
+      mostrarLogin(validacion.error);
+      return;
+    }
     mostrarApp();
     iniciarCatalogo();
   }
