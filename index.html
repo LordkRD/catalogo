@@ -254,6 +254,26 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 #confirm-cerrar { width: 100%; padding: 13px; background: var(--ink); color: var(--paper); border: none; border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .92rem; font-weight: 500; cursor: pointer; transition: background .2s; }
 #confirm-cerrar:hover { background: #2d2926; }
 
+
+
+/* ── LOGIN FACTURASCRIPTS ── */
+#app-shell { min-height: 100vh; }
+#login-screen { position: fixed; inset: 0; z-index: 1000; background: linear-gradient(160deg, #161412, #2d2926); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.login-card { width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 1.6rem; box-shadow: 0 25px 65px rgba(0,0,0,.35); }
+.login-title { font-family: 'Playfair Display', serif; font-size: 1.65rem; margin-bottom: .35rem; color: #1a1714; }
+.login-sub { color: #6b645a; font-size: .88rem; margin-bottom: 1rem; line-height: 1.45; }
+.login-form { display: flex; flex-direction: column; gap: .7rem; }
+.login-form label { font-size: .66rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #7a746a; margin-bottom: .22rem; display: block; }
+.login-form input { width: 100%; padding: 10px 11px; border: 1px solid #ddd4c8; border-radius: 10px; font-size: .88rem; outline: none; }
+.login-form input:focus { border-color: var(--gold); }
+#login-btn { margin-top: .3rem; border: none; border-radius: 40px; background: var(--ink); color: var(--paper); padding: 12px; font-size: .9rem; font-weight: 600; cursor: pointer; }
+#login-btn:disabled { opacity: .75; cursor: wait; }
+#login-error { min-height: 1.1rem; color: var(--red); font-size: .78rem; margin-top: .15rem; }
+.login-help { margin-top: .6rem; color: #7a746a; font-size: .74rem; line-height: 1.35; }
+.agent-badge { font-size: .72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 40px; padding: 6px 10px; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#logout-btn { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 40px; font-size: .78rem; padding: 7px 12px; cursor: pointer; }
+#logout-btn:hover { background: var(--cream); color: var(--ink); }
+
 @media (max-width: 620px) {
   #panel { width: 100vw; }
   .p-body { flex-direction: column; }
@@ -269,6 +289,31 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 </head>
 <body>
 
+<div id="login-screen">
+  <div class="login-card">
+    <h1 class="login-title">Ingreso de agentes</h1>
+    <p class="login-sub">Inicia sesión con tu usuario y clave de FacturaScripts para acceder al catálogo.</p>
+    <form class="login-form" id="login-form" onsubmit="loginFacturaScripts(event)">
+      <div>
+        <label for="fs-url">URL de FacturaScripts</label>
+        <input id="fs-url" type="url" placeholder="https://miempresa.com" required>
+      </div>
+      <div>
+        <label for="fs-user">Usuario agente</label>
+        <input id="fs-user" autocomplete="username" required>
+      </div>
+      <div>
+        <label for="fs-pass">Clave</label>
+        <input id="fs-pass" type="password" autocomplete="current-password" required>
+      </div>
+      <button id="login-btn" type="submit">Entrar</button>
+      <div id="login-error"></div>
+    </form>
+    <p class="login-help">Si el acceso falla, verifica la URL base de tu instalación de FacturaScripts y que ese agente tenga permiso para entrar.</p>
+  </div>
+</div>
+
+<div id="app-shell" style="display:none;">
 <div id="banner">
   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <span id="banner-text">🎉 ¡Bienvenido a nuestro catálogo!</span>
@@ -278,6 +323,8 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 <header>
   <div class="logo"><em>Mi</em> Catálogo</div>
   <div class="header-actions">
+    <span id="agent-badge" class="agent-badge" style="display:none"></span>
+    <button id="logout-btn" onclick="cerrarSesion()" style="display:none">Salir</button>
     <button id="dark-btn" onclick="toggleDark()" title="Modo oscuro">
       <svg id="dark-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     </button>
@@ -394,8 +441,88 @@ const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
 
 let PRODS = [], carrito = [], catActual = "Todos", busqueda = "", vistaActual = "grid";
+let agenteSesion = null;
 
 document.getElementById("banner-text").textContent = BANNER_TEXTO;
+
+function getBaseUrl(url) {
+  return url.trim().replace(/\/$/, "");
+}
+
+function mostrarApp() {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app-shell").style.display = "block";
+  const badge = document.getElementById("agent-badge");
+  const logout = document.getElementById("logout-btn");
+  if (agenteSesion) {
+    badge.textContent = "Agente: " + agenteSesion.user;
+    badge.style.display = "inline-flex";
+    logout.style.display = "inline-flex";
+  }
+}
+
+function cerrarSesion() {
+  localStorage.removeItem("fs_agent_session");
+  location.reload();
+}
+
+async function validarAgenteFacturaScripts(baseUrl, usuario, clave) {
+  const endpoint = getBaseUrl(baseUrl) + "/api/3/login";
+  const intentos = [
+    { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nick: usuario, password: clave }) },
+    { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: usuario, password: clave }) },
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ nick: usuario, password: clave }).toString() }
+  ];
+
+  let ultimoError = "Credenciales inválidas.";
+  for (const intento of intentos) {
+    try {
+      const r = await fetch(endpoint, { method: "POST", headers: intento.headers, body: intento.body });
+      let data = {};
+      try { data = await r.json(); } catch (_) {}
+      if (r.ok) {
+        return { ok: true, token: data.token || data.jwt || "" };
+      }
+      ultimoError = data.error || data.message || `Error ${r.status} al validar en FacturaScripts.`;
+      if (r.status === 401 || r.status === 403) break;
+    } catch (_) {
+      ultimoError = "No se pudo conectar con FacturaScripts (revisa CORS/URL).";
+    }
+  }
+
+  return { ok: false, error: ultimoError };
+}
+
+async function loginFacturaScripts(event) {
+  event.preventDefault();
+  const fsUrl = document.getElementById("fs-url").value.trim();
+  const user = document.getElementById("fs-user").value.trim();
+  const pass = document.getElementById("fs-pass").value;
+  const errorEl = document.getElementById("login-error");
+  const btn = document.getElementById("login-btn");
+
+  errorEl.textContent = "";
+  btn.disabled = true;
+  btn.textContent = "Validando…";
+
+  const validacion = await validarAgenteFacturaScripts(fsUrl, user, pass);
+  if (!validacion.ok) {
+    errorEl.textContent = validacion.error;
+    btn.disabled = false;
+    btn.textContent = "Entrar";
+    return;
+  }
+
+  agenteSesion = { baseUrl: getBaseUrl(fsUrl), user, token: validacion.token, at: Date.now() };
+  localStorage.setItem("fs_agent_session", JSON.stringify(agenteSesion));
+  mostrarApp();
+  iniciarCatalogo();
+}
+
+function iniciarCatalogo() {
+  cargarProductos();
+  actualizarPanel();
+}
 
 function toggleDark() {
   const dark = document.body.classList.toggle("dark");
@@ -765,8 +892,19 @@ function toast(msg, tipo = "") {
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); } });
 
-cargarProductos();
-actualizarPanel();
+(() => {
+  const saved = localStorage.getItem("fs_agent_session");
+  if (saved) {
+    try { agenteSesion = JSON.parse(saved); } catch (_) { agenteSesion = null; }
+  }
+  if (agenteSesion?.user) {
+    document.getElementById("fs-url").value = agenteSesion.baseUrl || "";
+    document.getElementById("fs-user").value = agenteSesion.user || "";
+    mostrarApp();
+    iniciarCatalogo();
+  }
+})();
 </script>
+</div>
 </body>
 </html>
