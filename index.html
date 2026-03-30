@@ -41,23 +41,40 @@ body.dark #var-modal, body.dark #confirm-modal { background: #1a1714; }
 html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; transition: background .3s, color .3s; }
 
-#banner { background: var(--gold); color: var(--ink); text-align: center; padding: 9px 2rem; font-size: .82rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; }
-#banner-close { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--ink); font-size: 1rem; opacity: .6; display: flex; align-items: center; justify-content: center; }
+/* ── BANNER ── */
+#banner {
+  background: var(--gold); color: var(--ink);
+  text-align: center; padding: 9px 2rem;
+  font-size: .82rem; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative;
+}
+#banner-close {
+  position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--ink); font-size: 1rem; opacity: .6;
+  display: flex; align-items: center; justify-content: center;
+}
 #banner-close:hover { opacity: 1; }
 #banner.hidden { display: none; }
 
+/* ── HEADER ── */
 header { position: sticky; top: 0; z-index: 100; background: var(--paper); border-bottom: 1px solid var(--line); padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; transition: background .3s; }
 .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; }
 .logo em { color: var(--gold); font-style: normal; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
-#dark-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; transition: background .15s; }
+
+#dark-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; cursor: pointer; color: var(--muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 #dark-btn:hover { background: var(--cream); color: var(--ink); }
+
 #share-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 40px; border: 1px solid var(--line); background: transparent; font-family: 'DM Sans', sans-serif; font-size: .8rem; color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
 #share-btn:hover { border-color: #25d366; color: #25d366; background: rgba(37,211,102,.06); }
+
 .view-btns { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .vbtn { width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; transition: background .15s; }
 .vbtn:hover { background: var(--cream); }
 .vbtn.on { background: var(--ink); color: var(--paper); }
+
 #cart-btn { display: flex; align-items: center; gap: 8px; background: var(--ink); color: var(--paper); border: none; border-radius: 40px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: .875rem; font-weight: 500; cursor: pointer; transition: background .2s, transform .1s; }
 #cart-btn:hover  { background: #2d2926; }
 #cart-btn:active { transform: scale(.97); }
@@ -88,19 +105,42 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 .spinner { width: 34px; height: 34px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--gold); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── CARD ── */
 .card { background: var(--card); border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); min-width: 0; transition: transform .22s ease, box-shadow .22s ease; opacity: 0; transform: translateY(14px); animation: up .4s forwards; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(26,23,20,.12); }
 .card.agotada { opacity: .75; }
 .card.agotada:hover { transform: translateY(0); box-shadow: none; }
 @keyframes up { to { opacity:1; transform:translateY(0); } }
+
 .card-img-wrap { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: var(--cream); display: block; cursor: zoom-in; position: relative; }
 .card-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transition: transform .3s ease; }
 .card:hover .card-img { transform: scale(1.04); }
 .card.agotada .card-img { filter: grayscale(.4); }
 .card-ph { width: 100%; aspect-ratio: 4/3; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-.badge-agotado { position: absolute; inset: 0; background: rgba(0,0,0,.38); display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.badge-agotado span { background: var(--red); color: #fff; font-size: .72rem; font-weight: 500; padding: 5px 14px; border-radius: 40px; letter-spacing: .08em; text-transform: uppercase; }
-.badge-stock { position: absolute; bottom: 8px; left: 8px; background: rgba(26,23,20,.7); color: #fff; font-size: .68rem; font-weight: 500; padding: 3px 9px; border-radius: 40px; pointer-events: none; }
+
+/* Badge agotado */
+.badge-agotado {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.38);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.badge-agotado span {
+  background: var(--red); color: #fff;
+  font-size: .72rem; font-weight: 500;
+  padding: 5px 14px; border-radius: 40px;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* Badge stock bajo */
+.badge-stock {
+  position: absolute; bottom: 8px; left: 8px;
+  background: rgba(26,23,20,.7); color: #fff;
+  font-size: .68rem; font-weight: 500;
+  padding: 3px 9px; border-radius: 40px;
+  pointer-events: none;
+}
+
 .card-body { padding: 1rem 1.1rem 1.2rem; }
 .card-cat  { font-size: .68rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: .35rem; }
 .card-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; line-height: 1.3; margin-bottom: .3rem; }
@@ -108,7 +148,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 .card-variantes { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: .75rem; align-items: center; }
 .var-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(0,0,0,.12); cursor: pointer; transition: transform .15s; flex-shrink: 0; }
 .var-dot:hover { transform: scale(1.25); }
-.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.card-foot { display: flex; align-items: center; justify-content: space-between; }
 .card-price { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; }
 .card-price small { font-size: .68rem; font-weight: 400; color: var(--muted); }
 
@@ -124,41 +164,31 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 #grid.list-view .card-foot { flex-shrink: 0; flex-direction: column; align-items: flex-end; gap: 6px; }
 #grid.list-view .card-info { flex: 1; min-width: 0; }
 
-/* ── CONTROL CANTIDAD EN TARJETA ── */
+/* ── BOTONES ACCIÓN ── */
 .add-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--ink); color: #fff; border: none; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; transition: background .15s, transform .1s; flex-shrink: 0; }
 .add-btn:hover  { background: var(--gold); color: var(--ink); }
 .add-btn:active { transform: scale(.88); }
 .add-btn.done   { background: var(--green); }
 .add-btn:disabled { background: var(--muted); cursor: not-allowed; }
-
-.card-qty { display: flex; align-items: center; gap: 4px; background: var(--cream); border-radius: 40px; padding: 3px 5px; flex-shrink: 0; }
-.cq-btn { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; border: none; cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center; transition: background .12s, transform .1s; flex-shrink: 0; }
+.card-qty { display: flex; align-items: center; gap: 6px; background: var(--cream); border-radius: 40px; padding: 4px 6px; flex-shrink: 0; }
+.cq-btn { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; border: none; cursor: pointer; font-size: 1rem; font-weight: 500; display: flex; align-items: center; justify-content: center; transition: background .12s, transform .1s; flex-shrink: 0; }
 .cq-btn:hover  { background: var(--gold); color: var(--ink); }
 .cq-btn:active { transform: scale(.88); }
-/* Input cantidad manual en tarjeta */
-.cq-input {
-  width: 36px; height: 26px;
-  border: 1px solid var(--line); border-radius: 6px;
-  background: #fff; color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
-  font-size: .82rem; font-weight: 500;
-  text-align: center; outline: none;
-  transition: border-color .15s;
-  padding: 0 2px;
-}
-.cq-input:focus { border-color: var(--gold); }
+.cq-val { font-size: .88rem; font-weight: 500; min-width: 20px; text-align: center; color: var(--ink); }
 
 /* ── ZOOM ── */
 #zoom-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(10,8,6,.92); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; align-items: center; justify-content: center; cursor: zoom-out; padding: 1rem; }
 #zoom-overlay.on { opacity: 1; pointer-events: all; }
 #zoom-img { max-width: 90vw; max-height: 88vh; border-radius: 12px; object-fit: contain; transform: scale(.92); transition: transform .28s cubic-bezier(.4,0,.2,1); display: block; }
 #zoom-overlay.on #zoom-img { transform: scale(1); }
-#zoom-close { position: absolute; top: 1rem; right: 1rem; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+#zoom-close { position: absolute; top: 1rem; right: 1rem; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 #zoom-close:hover { background: rgba(255,255,255,.28); }
 
+/* ── OVERLAY ── */
 #overlay { position: fixed; inset: 0; z-index: 200; background: rgba(26,23,20,.5); opacity: 0; pointer-events: none; transition: opacity .3s; }
 #overlay.on { opacity: 1; pointer-events: all; }
 
+/* ── PANEL ── */
 #panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 201; width: min(760px, 100vw); background: var(--paper); transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -8px 0 40px rgba(26,23,20,.14); }
 #panel.on { transform: translateX(0); }
 .p-head { padding: 1.2rem 1.5rem 1rem; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
@@ -171,31 +201,18 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 #citems { flex: 1; overflow-y: auto; padding: .5rem 1.25rem .75rem; display: flex; flex-direction: column; gap: .55rem; min-height: 0; }
 .c-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: .88rem; gap: .5rem; padding: 2rem 0; }
 .c-empty-ico { font-size: 2.5rem; opacity: .22; }
-
 .ci { display: flex; gap: 9px; align-items: flex-start; padding: .65rem; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
 .ci-img { width: 46px; height: 46px; border-radius: 7px; object-fit: cover; background: var(--cream); flex-shrink: 0; }
 .ci-ph  { width: 46px; height: 46px; border-radius: 7px; background: var(--cream); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 .ci-info { flex: 1; min-width: 0; }
 .ci-name  { font-size: .81rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ci-price { font-size: .74rem; color: var(--gold); font-weight: 500; margin-top: 1px; }
-.ci-ctrl  { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
-.q-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: .8rem; display: flex; align-items: center; justify-content: center; transition: background .1s; }
+.ci-ctrl  { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+.q-btn { width: 21px; height: 21px; border-radius: 50%; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: .78rem; display: flex; align-items: center; justify-content: center; transition: background .1s; }
 .q-btn:hover { background: var(--cream); }
-/* Input cantidad manual en carrito */
-.q-input {
-  width: 40px; height: 22px;
-  border: 1px solid var(--line); border-radius: 5px;
-  background: var(--paper); color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
-  font-size: .78rem; font-weight: 500;
-  text-align: center; outline: none;
-  transition: border-color .15s;
-  padding: 0 2px;
-}
-.q-input:focus { border-color: var(--gold); }
+.q-val { font-size: .78rem; font-weight: 500; min-width: 16px; text-align: center; }
 .ci-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .74rem; padding: 2px; transition: color .1s; flex-shrink: 0; margin-top: 2px; }
 .ci-del:hover { color: var(--red); }
-
 .p-totales { padding: .75rem 1.25rem .9rem; border-top: 1px solid var(--line); flex-shrink: 0; }
 .s-row  { display: flex; justify-content: space-between; font-size: .79rem; color: var(--muted); margin-bottom: .25rem; }
 .s-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--line); }
@@ -207,17 +224,34 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 .field input, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font-family: 'DM Sans', sans-serif; font-size: .83rem; color: var(--ink); outline: none; transition: border-color .15s; }
 .field input:focus, .field textarea:focus { border-color: var(--gold); }
 .field textarea { resize: none; height: 64px; }
+
+/* ── Botón buscar cliente ── */
+.buscar-row { display: flex; gap: 6px; }
+.buscar-row input { flex: 1; }
+.buscar-row button {
+  padding: 0 14px; border-radius: 8px;
+  background: var(--ink); color: var(--paper);
+  border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: .8rem; font-weight: 500; white-space: nowrap;
+  transition: background .15s;
+}
+.buscar-row button:hover { background: #2d2926; }
+#cliente-status { font-size: .72rem; margin-top: 4px; display: block; min-height: 1rem; }
+
 #ok-btn { width: 100%; padding: 12px; background: var(--ink); color: var(--paper); border: none; border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: background .2s; margin-top: .85rem; flex-shrink: 0; }
 #ok-btn:hover    { background: #2d2926; }
 #ok-btn:disabled { background: var(--muted); cursor: not-allowed; }
 
+/* ── TOAST ── */
 #toast { position: fixed; bottom: 1.5rem; left: 50%; z-index: 600; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--paper); padding: .7rem 1.3rem; border-radius: 40px; font-size: .85rem; opacity: 0; pointer-events: none; transition: opacity .28s, transform .28s; white-space: nowrap; }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 #toast.ok   { background: var(--green); }
 #toast.err  { background: var(--red); }
+
 .spin { display: inline-block; width: 17px; height: 17px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; animation: spin .7s linear infinite; }
 .no-results { padding: 3rem 0; text-align: center; color: var(--muted); font-size: .9rem; }
 
+/* ── POPUP VARIANTES ── */
 #var-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,8,6,.82); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 #var-overlay.on { opacity: 1; pointer-events: all; }
 #var-modal { background: var(--paper); border-radius: 20px; padding: 1.6rem; width: 100%; max-width: 360px; transform: translateY(22px); transition: transform .28s cubic-bezier(.4,0,.2,1); }
@@ -239,9 +273,15 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 #vm-cancelar { padding: 12px 18px; background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; transition: background .15s; }
 #vm-cancelar:hover { background: var(--cream); }
 
+/* ── MODAL CONFIRMACIÓN ── */
 #confirm-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,8,6,.85); opacity: 0; pointer-events: none; transition: opacity .3s; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 #confirm-overlay.on { opacity: 1; pointer-events: all; }
-#confirm-modal { background: var(--paper); border-radius: 24px; padding: 2rem; width: 100%; max-width: 420px; transform: translateY(24px); transition: transform .3s cubic-bezier(.4,0,.2,1); text-align: center; }
+#confirm-modal {
+  background: var(--paper); border-radius: 24px;
+  padding: 2rem; width: 100%; max-width: 420px;
+  transform: translateY(24px); transition: transform .3s cubic-bezier(.4,0,.2,1);
+  text-align: center;
+}
 #confirm-overlay.on #confirm-modal { transform: translateY(0); }
 .confirm-icon { font-size: 3rem; margin-bottom: 1rem; }
 #confirm-modal h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: .4rem; color: var(--green); }
@@ -254,6 +294,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 #confirm-cerrar { width: 100%; padding: 13px; background: var(--ink); color: var(--paper); border: none; border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .92rem; font-weight: 500; cursor: pointer; transition: background .2s; }
 #confirm-cerrar:hover { background: #2d2926; }
 
+/* ── RESPONSIVE ── */
 @media (max-width: 620px) {
   #panel { width: 100vw; }
   .p-body { flex-direction: column; }
@@ -269,9 +310,10 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 </head>
 <body>
 
+<!-- BANNER -->
 <div id="banner">
   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-  <span id="banner-text">🎉 ¡Bienvenido a nuestro catálogo!</span>
+  <span id="banner-text">🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.</span>
   <button id="banner-close" onclick="document.getElementById('banner').classList.add('hidden')">✕</button>
 </div>
 
@@ -319,6 +361,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
   <div id="grid" style="display:none"></div>
 </div>
 
+<!-- ZOOM -->
 <div id="zoom-overlay" onclick="cerrarZoom()">
   <button id="zoom-close" onclick="cerrarZoom()">✕</button>
   <img id="zoom-img" src="" alt="">
@@ -343,6 +386,20 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
     <div class="p-form-col">
       <div class="p-col-title">Datos del cliente</div>
       <form id="cform" onsubmit="return false">
+
+        <!-- ✅ BUG 2 CORREGIDO: f-codcliente ahora existe en el HTML -->
+        <input type="hidden" id="f-codcliente" value="">
+
+        <!-- Búsqueda por ID de cliente -->
+        <div class="field">
+          <label>Buscar cliente por ID</label>
+          <div class="buscar-row">
+            <input id="f-cliente-id" type="text" placeholder="Ej: C00012">
+            <button type="button" onclick="buscarClientePorId()">Buscar</button>
+          </div>
+          <small id="cliente-status"></small>
+        </div>
+
         <div class="field"><label>Nombre *</label><input id="f-nombre" placeholder="Juan Pérez" required></div>
         <div class="field"><label>Teléfono *</label><input id="f-tel" type="tel" placeholder="809-000-0000" required></div>
         <div class="field"><label>Email</label><input id="f-email" type="email" placeholder="correo@ejemplo.com"></div>
@@ -356,6 +413,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
   </div>
 </aside>
 
+<!-- POPUP VARIANTES -->
 <div id="var-overlay" onclick="cerrarVariantes(event)">
   <div id="var-modal">
     <h3 id="vm-nombre"></h3>
@@ -370,6 +428,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
   </div>
 </div>
 
+<!-- MODAL CONFIRMACIÓN DE PEDIDO -->
 <div id="confirm-overlay">
   <div id="confirm-modal">
     <div class="confirm-icon">✅</div>
@@ -387,16 +446,21 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbwja3-2O4d4_Fq8TkJb9dB2eD551UgVVRwx0yJ2nUBAaVFhrGEFA2S8m2jDuVSbyrblHQ/exec";
-//"https://script.google.com/macros/s/AKfycbwc7Hmo8hQW0W28vyb7snFz07_HhGjz5x7mxuohdPAyl6iSnhdSZbIVOw-9kUI9ImWfgg/exec"
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbx8WQqXd9nj7JG2DyTrNWEfJwi60KBRPUUVOKCvsmxHoCCAIG7lXO4d-3PqxFdTlZl8/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
 
-let PRODS = [], carrito = [], catActual = "Todos", busqueda = "", vistaActual = "grid";
+let PRODS       = [];
+let carrito     = [];
+let catActual   = "Todos";
+let busqueda    = "";
+let vistaActual = "grid";
 
+// ── BANNER ───────────────────────────────────────────────────────
 document.getElementById("banner-text").textContent = BANNER_TEXTO;
 
+// ── MODO OSCURO ──────────────────────────────────────────────────
 function toggleDark() {
   const dark = document.body.classList.toggle("dark");
   localStorage.setItem("dark", dark ? "1" : "0");
@@ -407,12 +471,17 @@ function actualizarIconoDark(dark) {
     ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
     : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
 }
-if (localStorage.getItem("dark") === "1") { document.body.classList.add("dark"); actualizarIconoDark(true); }
-
-function compartirCatalogo() {
-  window.open("https://wa.me/?text=" + encodeURIComponent("¡Mira nuestro catálogo! " + CATALOGO_URL), "_blank");
+if (localStorage.getItem("dark") === "1") {
+  document.body.classList.add("dark");
+  actualizarIconoDark(true);
 }
 
+// ── COMPARTIR POR WHATSAPP ───────────────────────────────────────
+function compartirCatalogo() {
+  window.open("https://wa.me/?text=" + encodeURIComponent("¡Hola! Mira nuestro catálogo en línea: " + CATALOGO_URL), "_blank");
+}
+
+// ── VISTA ────────────────────────────────────────────────────────
 function setVista(v) {
   vistaActual = v;
   document.getElementById("grid").classList.toggle("list-view", v === "list");
@@ -421,6 +490,7 @@ function setVista(v) {
   renderGrid();
 }
 
+// ── ZOOM ─────────────────────────────────────────────────────────
 function abrirZoom(src, alt) {
   document.getElementById("zoom-img").src = src;
   document.getElementById("zoom-img").alt = alt;
@@ -432,6 +502,7 @@ function cerrarZoom() {
   document.body.style.overflow = "";
 }
 
+// ── CARGA PRODUCTOS ──────────────────────────────────────────────
 async function cargarProductos() {
   try {
     const r    = await fetch(SCRIPT_URL + "?action=productos");
@@ -463,14 +534,16 @@ function buscar(q) { busqueda = q.toLowerCase(); renderGrid(); }
 
 function colorCSS(nombre) {
   const mapa = {
-    rojo:"#e74c3c",azul:"#3498db",verde:"#2ecc71",amarillo:"#f1c40f",naranja:"#e67e22",
-    morado:"#9b59b6",rosa:"#e91e8c",negro:"#1a1714",blanco:"#f5f5f0",gris:"#95a5a6",
-    cafe:"#8d5524",dorado:"#c9a84c",plateado:"#bdc3c7",celeste:"#87ceeb",turquesa:"#1abc9c",
-    fucsia:"#ff006e",beige:"#f5f0e8",lila:"#c3b1e1",coral:"#ff6b6b",menta:"#98d8c8",
-    salmon:"#fa8072",vino:"#722f37",crema:"#fffdd0",
-    red:"#e74c3c",blue:"#3498db",green:"#2ecc71",yellow:"#f1c40f",orange:"#e67e22",
-    purple:"#9b59b6",pink:"#e91e8c",black:"#1a1714",white:"#f5f5f0",gray:"#95a5a6",
-    grey:"#95a5a6",brown:"#8d5524",gold:"#c9a84c",silver:"#bdc3c7"
+    rojo:"#e74c3c", azul:"#3498db", verde:"#2ecc71", amarillo:"#f1c40f",
+    naranja:"#e67e22", morado:"#9b59b6", rosa:"#e91e8c", negro:"#1a1714",
+    blanco:"#f5f5f0", gris:"#95a5a6", cafe:"#8d5524", dorado:"#c9a84c",
+    plateado:"#bdc3c7", celeste:"#87ceeb", turquesa:"#1abc9c",
+    fucsia:"#ff006e", beige:"#f5f0e8", lila:"#c3b1e1", coral:"#ff6b6b",
+    menta:"#98d8c8", salmon:"#fa8072", vino:"#722f37", crema:"#fffdd0",
+    red:"#e74c3c", blue:"#3498db", green:"#2ecc71", yellow:"#f1c40f",
+    orange:"#e67e22", purple:"#9b59b6", pink:"#e91e8c", black:"#1a1714",
+    white:"#f5f5f0", gray:"#95a5a6", grey:"#95a5a6", brown:"#8d5524",
+    gold:"#c9a84c", silver:"#bdc3c7"
   };
   return mapa[nombre.toLowerCase().trim()] ||
     "#" + Math.abs(nombre.split("").reduce((h,c) => (h<<5)-h+c.charCodeAt(0)|0,0))
@@ -488,13 +561,15 @@ function renderGrid() {
     p.nombre.toLowerCase().includes(busqueda) ||
     (p.descripcion || "").toLowerCase().includes(busqueda)
   );
+
   if (!lista.length) {
     grid.innerHTML = `<div class="no-results">Sin resultados para "<strong>${busqueda || catActual}</strong>"</div>`;
     return;
   }
 
   grid.innerHTML = lista.map((p, i) => {
-    const enCarrito = carrito.find(c => c.id === p.id);
+    // ✅ BUG 3 CORREGIDO: usar _key en lugar de id para buscar en carrito
+    const enCarrito = carrito.find(c => c._key === p.id);
     const variantes = p.variantes ? p.variantes.split(",").map(v => v.trim()).filter(Boolean) : [];
     const tieneVar  = variantes.length > 0;
     const agotado   = p.stock === 0;
@@ -502,32 +577,29 @@ function renderGrid() {
 
     const imgSrc = p.imagen || "";
     const imgEl  = imgSrc
-      ? `<div class="card-img-wrap" ${agotado?"":"onclick=\"abrirZoom('"+imgSrc+"','"+p.nombre.replace(/'/g,"\\'")+"')\""} style="${agotado?"cursor:default":""}">
-           <img class="card-img" src="${imgSrc}" alt="${p.nombre}" loading="lazy" onerror="this.parentElement.outerHTML='<div class=card-ph>🛍️</div>'">
+      ? `<div class="card-img-wrap" ${agotado ? "" : `onclick="abrirZoom('${imgSrc}','${p.nombre.replace(/'/g,"\\'")}')"`} style="${agotado?"cursor:default":""}">
+           <img class="card-img" src="${imgSrc}" alt="${p.nombre}" loading="lazy"
+                onerror="this.parentElement.outerHTML='<div class=card-ph>🛍️</div>'">
            ${agotado ? '<div class="badge-agotado"><span>Agotado</span></div>' : ""}
            ${stockBajo ? `<div class="badge-stock">Solo ${p.stock} disponibles</div>` : ""}
          </div>`
-      : `<div class="card-ph">${agotado?"❌":"🛍️"}</div>`;
+      : `<div class="card-ph">${agotado ? "❌" : "🛍️"}</div>`;
 
     const puntosHTML = tieneVar
-      ? `<div class="card-variantes">${variantes.slice(0,8).map(v=>`<div class="var-dot" title="${v}" style="background:${colorCSS(v)}"></div>`).join("")}${variantes.length>8?`<span style="font-size:.68rem;color:var(--muted)">+${variantes.length-8}</span>`:""}</div>`
+      ? `<div class="card-variantes">${variantes.slice(0,8).map(v => `<div class="var-dot" title="${v}" style="background:${colorCSS(v)}"></div>`).join("")}${variantes.length > 8 ? `<span style="font-size:.68rem;color:var(--muted)">+${variantes.length-8}</span>` : ""}</div>`
       : "";
 
-    // Control de cantidad con input manual en tarjeta
     const accionHTML = agotado
       ? `<button class="add-btn" disabled title="Sin stock">✕</button>`
       : enCarrito && !tieneVar
         ? `<div class="card-qty">
-             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',-1)">−</button>
-             <input class="cq-input" type="number" min="1" value="${enCarrito.qty}"
-               id="cqv-${p.id}"
-               onchange="setQtyCard('${p.id}',this.value)"
-               onclick="this.select()">
-             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',1)">+</button>
+             <button class="cq-btn" onclick="cambiarQty('${p.id}',-1)">−</button>
+             <span class="cq-val" id="cqv-${p.id}">${enCarrito.qty}</span>
+             <button class="cq-btn" onclick="cambiarQty('${p.id}',1)">+</button>
            </div>`
         : `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
-               onclick="${tieneVar?`abrirVariantes('${p.id}')`:`agregar('${p.id}')`}">
-               ${enCarrito?"✓":"+"}
+               onclick="${tieneVar ? `abrirVariantes('${p.id}')` : `agregar('${p.id}')`}">
+               ${enCarrito ? "✓" : "+"}
              </button>`;
 
     if (vistaActual === "list") {
@@ -536,9 +608,9 @@ function renderGrid() {
         ${imgEl}
         <div class="card-body">
           <div class="card-info">
-            ${p.categoria?`<div class="card-cat">${p.categoria}</div>`:""}
+            ${p.categoria ? `<div class="card-cat">${p.categoria}</div>` : ""}
             <div class="card-name">${p.nombre}</div>
-            ${p.descripcion?`<div class="card-desc">${p.descripcion}</div>`:""}
+            ${p.descripcion ? `<div class="card-desc">${p.descripcion}</div>` : ""}
             ${puntosHTML}
           </div>
           <div class="card-foot">
@@ -548,13 +620,14 @@ function renderGrid() {
         </div>
       </div>`;
     }
+
     return `
     <div class="card ${agotado?"agotada":""}" style="animation-delay:${i*.05}s">
       ${imgEl}
       <div class="card-body">
-        ${p.categoria?`<div class="card-cat">${p.categoria}</div>`:""}
+        ${p.categoria ? `<div class="card-cat">${p.categoria}</div>` : ""}
         <div class="card-name">${p.nombre}</div>
-        ${p.descripcion?`<div class="card-desc">${p.descripcion}</div>`:""}
+        ${p.descripcion ? `<div class="card-desc">${p.descripcion}</div>` : ""}
         ${puntosHTML}
         <div class="card-foot">
           <div class="card-price">RD$${Number(p.precio).toLocaleString("es-DO")}<small>/u</small></div>
@@ -565,6 +638,7 @@ function renderGrid() {
   }).join("");
 }
 
+// ── AGREGAR AL CARRITO ───────────────────────────────────────────
 function agregar(id, variante) {
   const p = PRODS.find(x => x.id === id);
   if (!p || p.stock === 0) return;
@@ -583,29 +657,7 @@ function agregar(id, variante) {
   toast((variante ? p.nombre + " (" + variante + ")" : p.nombre) + " agregado ✓");
 }
 
-// Cambiar cantidad con botones en tarjeta
-function cambiarQtyCard(id, delta) {
-  const item = carrito.find(c => c._key === id);
-  if (!item) return;
-  const nuevaQty = Math.max(1, item.qty + delta);
-  item.qty = nuevaQty;
-  const inp = document.getElementById("cqv-" + id);
-  if (inp) inp.value = nuevaQty;
-  actualizarPanel();
-}
-
-// Establecer cantidad manual en tarjeta
-function setQtyCard(id, val) {
-  const qty = Math.max(1, parseInt(val) || 1);
-  const item = carrito.find(c => c._key === id);
-  if (!item) return;
-  item.qty = qty;
-  const inp = document.getElementById("cqv-" + id);
-  if (inp) inp.value = qty;
-  actualizarPanel();
-}
-
-// Cambiar cantidad en el panel del carrito
+// ── CAMBIAR CANTIDAD ─────────────────────────────────────────────
 function cambiarQty(key, delta) {
   const item = carrito.find(c => c._key === key);
   if (!item) return;
@@ -613,19 +665,14 @@ function cambiarQty(key, delta) {
   if (item.qty <= 0) {
     carrito = carrito.filter(c => c._key !== key);
     renderGrid();
+  } else {
+    const cqv = document.getElementById("cqv-" + item.id);
+    if (cqv) cqv.textContent = item.qty;
   }
   actualizarPanel();
 }
 
-// Establecer cantidad manual en el panel
-function setQtyPanel(key, val) {
-  const qty  = Math.max(1, parseInt(val) || 1);
-  const item = carrito.find(c => c._key === key);
-  if (!item) return;
-  item.qty = qty;
-  actualizarPanel();
-}
-
+// ── PANEL CARRITO ────────────────────────────────────────────────
 function actualizarPanel() {
   const totalUnd = carrito.reduce((s, c) => s + c.qty, 0);
   document.getElementById("cart-count").textContent = totalUnd;
@@ -646,9 +693,7 @@ function actualizarPanel() {
           <div class="ci-price">RD$${Number(item.precio).toLocaleString("es-DO")} c/u</div>
           <div class="ci-ctrl">
             <button class="q-btn" onclick="cambiarQty('${sk}',-1)">−</button>
-            <input class="q-input" type="number" min="1" value="${item.qty}"
-              onchange="setQtyPanel('${sk}',this.value)"
-              onclick="this.select()">
+            <span class="q-val">${item.qty}</span>
             <button class="q-btn" onclick="cambiarQty('${sk}',1)">+</button>
           </div>
         </div>
@@ -662,6 +707,7 @@ function actualizarPanel() {
   document.getElementById("s-tot").textContent = "RD$" + sub.toLocaleString("es-DO");
 }
 
+// ── VARIANTES ────────────────────────────────────────────────────
 let varProdActual = null, varColoresActuales = [];
 
 function abrirVariantes(id) {
@@ -705,31 +751,116 @@ function cerrarVariantes(e) {
   varProdActual = null; varColoresActuales = [];
 }
 
+// ── BUSCAR CLIENTE POR ID ────────────────────────────────────────
+async function buscarClientePorId() {
+  const inputId  = document.getElementById("f-cliente-id").value.trim();
+  const statusEl = document.getElementById("cliente-status");
+
+  if (!inputId) {
+    statusEl.style.color = "var(--red)";
+    statusEl.textContent = "Ingresa un código de cliente";
+    return;
+  }
+
+  statusEl.style.color = "var(--gold)";
+  statusEl.textContent = "Buscando...";
+
+  try {
+    const url  = `${SCRIPT_URL}?action=getCliente&id=${encodeURIComponent(inputId)}`;
+    const r    = await fetch(url);
+    const data = await r.json();
+
+    if (data.ok && data.cliente) {
+      const c = data.cliente;
+      document.getElementById("f-nombre").value     = c.nombre    || "";
+      document.getElementById("f-tel").value        = c.telefono  || "";
+      document.getElementById("f-email").value      = c.email     || "";
+      document.getElementById("f-nota").value       = c.direccion || "";
+      // ✅ BUG 2 CORREGIDO: ahora este input existe en el HTML
+      document.getElementById("f-codcliente").value = c.codcliente || inputId;
+ // Bloquear campos para evitar errores de edición manual si ya existe el cliente
+    document.getElementById("f-nombre").readOnly = true;
+    document.getElementById("f-nombre").style.backgroundColor = "#e9e9e9";
+    
+    // Guardar el código en el input oculto
+    document.getElementById("f-codcliente").value = data.cliente.codcliente;
+
+      statusEl.style.color = "var(--green)";
+      statusEl.textContent = `✅ ${c.nombre}`;//aqui
+      toast(`Cliente "${c.nombre}" cargado`, "ok");
+    } else {
+      statusEl.style.color = "var(--red)";
+      statusEl.textContent = `❌ ${data.msg || "Cliente no encontrado"}`;
+      toast(data.msg || "Cliente no encontrado", "err");
+    }
+  } catch (e) {
+    statusEl.style.color = "var(--red)";
+    statusEl.textContent = "Error de conexión";
+    toast("No se pudo conectar con el servidor", "err");
+  }
+}
+
+// ── CHECKOUT ─────────────────────────────────────────────────────
+// ✅ BUG 1 CORREGIDO: función completa con try/catch/finally correctamente cerrados
 async function checkout() {
   if (!carrito.length) { toast("Tu carrito está vacío", "err"); return; }
-  const nombre = document.getElementById("f-nombre").value.trim();
-  const tel    = document.getElementById("f-tel").value.trim();
+  const nombre     = document.getElementById("f-nombre").value.trim();
+  const tel        = document.getElementById("f-tel").value.trim();
+  const codcliente = document.getElementById("f-codcliente")?.value || "";
   if (!nombre || !tel) { toast("Nombre y teléfono son obligatorios", "err"); return; }
+
   const btn = document.getElementById("ok-btn");
   btn.disabled = true;
   btn.innerHTML = `<span class="spin"></span> Enviando…`;
+
   const payload = {
-    action: "pedido", nombre, telefono: tel,
-    email:  document.getElementById("f-email").value.trim(),
-    nota:   document.getElementById("f-nota").value.trim(),
-    items:  carrito.map(c => ({ id: c.id, nombre: c.nombre, variante: c.variante || "", precio: c.precio, qty: c.qty, subtotal: c.precio * c.qty })),
-    total:  carrito.reduce((s, c) => s + c.precio * c.qty, 0)
+    action:     "pedido",
+    nombre: nombre,
+    telefono:   tel,
+    email: document.getElementById("f-email")?.value || "",
+    nota: document.getElementById("f-nota")?.value || "",
+    codcliente: codcliente,
+    items:      carrito.map(c => ({
+      id:        c.id,
+      nombre:    c.nombre,
+      variante:  c.variante || "",
+      precio:    c.precio,
+      qty:       c.qty,
+      subtotal:  c.precio * c.qty
+    })),
+    total: carrito.reduce((s, c) => s + c.precio * c.qty, 0)
   };
+
   try {
     const r    = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
     const data = await r.json();
+
+    // Caso: guardado localmente como fallback (igual mostramos confirmación)
+    if (data.guardadoLocalmente && !data.ok) {
+      toast("⚠️ " + (data.error || "No se pudo guardar en FacturaScripts"), "err");
+      // No limpiar — dejar que el usuario reintente
+      return;
+    }
+
     if (!data.ok) throw new Error(data.error || "Error desconocido");
+
     mostrarConfirm(data.id, payload);
     carrito = [];
     actualizarPanel();
     cerrarCarrito();
     renderGrid();
-    ["f-nombre","f-tel","f-email","f-nota"].forEach(id => document.getElementById(id).value = "");
+
+    // Limpiar formulario tras pedido exitoso
+    ["f-nombre","f-tel","f-email","f-nota","f-codcliente","f-cliente-id"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    const st = document.getElementById("cliente-status");
+    if (st) { st.textContent = ""; }
+    // Desbloquear campo nombre si estaba bloqueado
+    const fn = document.getElementById("f-nombre");
+    if (fn) { fn.readOnly = false; fn.style.backgroundColor = ""; }
+
   } catch (e) {
     toast("Error al enviar: " + e.message, "err");
   } finally {
@@ -738,10 +869,13 @@ async function checkout() {
   }
 }
 
+// ── MODAL CONFIRMACIÓN ───────────────────────────────────────────
 function mostrarConfirm(id, payload) {
   document.getElementById("confirm-id").textContent = id;
   document.getElementById("confirm-items").innerHTML =
-    payload.items.map(i => `<div class="confirm-item">${i.nombre} x${i.qty} — RD$${Number(i.subtotal).toLocaleString("es-DO")}</div>`).join("") +
+    payload.items.map(i =>
+      `<div class="confirm-item">${i.nombre} x${i.qty} — RD$${Number(i.subtotal).toLocaleString("es-DO")}</div>`
+    ).join("") +
     `<div class="confirm-total">Total: RD$${Number(payload.total).toLocaleString("es-DO")}</div>`;
   document.getElementById("confirm-overlay").classList.add("on");
   document.body.style.overflow = "hidden";
@@ -752,8 +886,16 @@ function cerrarConfirm() {
   document.body.style.overflow = "";
 }
 
-function abrirCarrito()  { document.getElementById("panel").classList.add("on"); document.getElementById("overlay").classList.add("on"); document.body.style.overflow = "hidden"; }
-function cerrarCarrito() { document.getElementById("panel").classList.remove("on"); document.getElementById("overlay").classList.remove("on"); document.body.style.overflow = ""; }
+function abrirCarrito()  {
+  document.getElementById("panel").classList.add("on");
+  document.getElementById("overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+function cerrarCarrito() {
+  document.getElementById("panel").classList.remove("on");
+  document.getElementById("overlay").classList.remove("on");
+  document.body.style.overflow = "";
+}
 
 let toastTimer;
 function toast(msg, tipo = "") {
@@ -763,7 +905,9 @@ function toast(msg, tipo = "") {
   toastTimer = setTimeout(() => el.className = "", 3200);
 }
 
-document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); } });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); }
+});
 
 cargarProductos();
 actualizarPanel();
