@@ -460,7 +460,7 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbyMVo8SOo-U0Hcl_pHLJsPkNu9yWBRr5lbg_3hSzn6CG5w_hxW3smcKeeEEH3U8aO2H/exec";
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbwdA-IjT-Gt3-xYJt-SUG2KrpJdrAEuJmQ-JB-hEJeEs7arf77PcyvS9hpVx-BGoT46/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
@@ -840,7 +840,7 @@ async function buscarClientePorId() {
 
     if (data.ok && data.cliente) {
       const c = data.cliente;
-      document.getElementById("f-nombre").value     = c.nombre    || "";
+      document.getElementById("f-nombre").value = c.razonsocial || c.nombre || "";
       document.getElementById("f-tel").value        = c.telefono  || "";
       document.getElementById("f-email").value      = c.email     || "";
       document.getElementById("f-nota").value       = c.direccion || "";
