@@ -175,6 +175,20 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
 .cq-btn:hover  { background: var(--gold); color: var(--ink); }
 .cq-btn:active { transform: scale(.88); }
 .cq-val { font-size: .88rem; font-weight: 500; min-width: 20px; text-align: center; color: var(--ink); }
+.cq-input {
+  width: 38px; height: 26px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem; font-weight: 500;
+  text-align: center; outline: none;
+  transition: border-color .15s;
+  padding: 0 2px;
+  -moz-appearance: textfield;
+}
+.cq-input::-webkit-outer-spin-button,
+.cq-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cq-input:focus { border-color: var(--gold); }
 
 /* ── ZOOM ── */
 #zoom-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(10,8,6,.92); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; align-items: center; justify-content: center; cursor: zoom-out; padding: 1rem; }
@@ -591,16 +605,19 @@ function renderGrid() {
 
     const accionHTML = agotado
       ? `<button class="add-btn" disabled title="Sin stock">✕</button>`
-      : enCarrito && !tieneVar
-        ? `<div class="card-qty">
-             <button class="cq-btn" onclick="cambiarQty('${p.id}',-1)">−</button>
-             <span class="cq-val" id="cqv-${p.id}">${enCarrito.qty}</span>
-             <button class="cq-btn" onclick="cambiarQty('${p.id}',1)">+</button>
-           </div>`
-        : `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
-               onclick="${tieneVar ? `abrirVariantes('${p.id}')` : `agregar('${p.id}')`}">
+      : tieneVar
+        ? `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
+               onclick="abrirVariantes('${p.id}')">
                ${enCarrito ? "✓" : "+"}
-             </button>`;
+             </button>`
+        : `<div class="card-qty">
+             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',-1)">−</button>
+             <input class="cq-input" type="number" min="0" value="${enCarrito ? enCarrito.qty : 0}"
+               id="cqv-${p.id}"
+               onchange="setQtyCard('${p.id}',this.value)"
+               onclick="this.select()">
+             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',1)">+</button>
+           </div>`;
 
     if (vistaActual === "list") {
       return `
@@ -657,17 +674,68 @@ function agregar(id, variante) {
   toast((variante ? p.nombre + " (" + variante + ")" : p.nombre) + " agregado ✓");
 }
 
-// ── CAMBIAR CANTIDAD ─────────────────────────────────────────────
+// ── CANTIDAD EN TARJETA ──────────────────────────────────────────
+function cambiarQtyCard(id, delta) {
+  const inp  = document.getElementById("cqv-" + id);
+  const item = carrito.find(c => c._key === id);
+  if (item) {
+    const nuevaQty = Math.max(0, item.qty + delta);
+    if (nuevaQty === 0) {
+      carrito = carrito.filter(c => c._key !== id);
+      if (inp) inp.value = 0;
+    } else {
+      item.qty = nuevaQty;
+      if (inp) inp.value = nuevaQty;
+    }
+  } else if (delta > 0) {
+    const p = PRODS.find(x => x.id === id);
+    if (p && p.stock !== 0) {
+      carrito.push({ ...p, _key: id, variante: "", nombre: p.nombre, qty: 1 });
+      if (inp) inp.value = 1;
+      toast(p.nombre + " agregado ✓");
+    }
+  }
+  const cnt = document.getElementById("cart-count");
+  cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
+  actualizarPanel();
+}
+
+function setQtyCard(id, val) {
+  const qty = Math.max(0, parseInt(val) || 0);
+  const inp  = document.getElementById("cqv-" + id);
+  if (qty === 0) {
+    carrito = carrito.filter(c => c._key !== id);
+    if (inp) inp.value = 0;
+    actualizarPanel();
+    return;
+  }
+  const item = carrito.find(c => c._key === id);
+  if (item) {
+    item.qty = qty;
+  } else {
+    const p = PRODS.find(x => x.id === id);
+    if (p && p.stock !== 0) {
+      carrito.push({ ...p, _key: id, variante: "", nombre: p.nombre, qty });
+      toast(p.nombre + " agregado ✓");
+    }
+  }
+  if (inp) inp.value = qty;
+  const cnt = document.getElementById("cart-count");
+  cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
+  actualizarPanel();
+}
+
+// ── CAMBIAR CANTIDAD EN CARRITO ──────────────────────────────────
 function cambiarQty(key, delta) {
   const item = carrito.find(c => c._key === key);
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) {
     carrito = carrito.filter(c => c._key !== key);
+    // Actualizar input en tarjeta si existe
+    const inp = document.getElementById("cqv-" + key);
+    if (inp) inp.value = 0;
     renderGrid();
-  } else {
-    const cqv = document.getElementById("cqv-" + item.id);
-    if (cqv) cqv.textContent = item.qty;
   }
   actualizarPanel();
 }
