@@ -320,6 +320,33 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
   #search-wrap { max-width: 100%; }
   #share-btn span { display: none; }
 }
+
+/* ── MODAL ATRIBUTOS ── */
+#attr-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(10,8,6,.82); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+#attr-overlay.on { opacity: 1; pointer-events: all; }
+#attr-modal { background: var(--paper); border-radius: 20px; padding: 1.6rem; width: 100%; max-width: 380px; transform: translateY(22px); transition: transform .28s cubic-bezier(.4,0,.2,1); }
+#attr-overlay.on #attr-modal { transform: translateY(0); }
+#attr-modal h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; margin-bottom: .25rem; }
+.attr-precio { font-size: .85rem; color: var(--gold); font-weight: 500; margin-bottom: 1rem; }
+.attr-grupo { margin-bottom: 1rem; }
+.attr-grupo-label { font-size: .7rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; display: block; }
+.attr-opciones { display: flex; gap: 8px; flex-wrap: wrap; }
+.attr-opt {
+  padding: 6px 14px; border-radius: 40px;
+  border: 1.5px solid var(--line); background: transparent;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem;
+  color: var(--ink); cursor: pointer;
+  transition: all .15s;
+}
+.attr-opt:hover { border-color: var(--gold); }
+.attr-opt.sel { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 500; }
+.attr-variante-info { font-size: .8rem; color: var(--muted); margin: .75rem 0 1rem; min-height: 1.2rem; }
+.attr-btns { display: flex; gap: .65rem; margin-top: .5rem; }
+#attr-agregar { flex: 1; padding: 12px; background: var(--ink); color: var(--paper); border: none; border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 500; cursor: pointer; transition: background .15s; }
+#attr-agregar:hover { background: #2d2926; }
+#attr-agregar:disabled { background: var(--muted); cursor: not-allowed; }
+#attr-cancelar { padding: 12px 18px; background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; transition: background .15s; }
+#attr-cancelar:hover { background: var(--cream); }
 </style>
 </head>
 <body>
@@ -453,14 +480,31 @@ header { position: sticky; top: 0; z-index: 100; background: var(--paper); borde
     <button id="confirm-cerrar" onclick="cerrarConfirm()" style="margin-top:1.25rem">Listo</button>
   </div>
 </div>
-
+<!-- MODAL ATRIBUTOS / VARIANTES -->
+<div id="attr-overlay" onclick="cerrarAtributos(event)">
+  <div id="attr-modal">
+    <h3 id="attr-nombre"></h3>
+    <div class="attr-precio" id="attr-precio"></div>
+    <div id="attr-grupos"></div>
+    <div class="attr-variante-info" id="attr-info">Selecciona los atributos</div>
+    <div class="attr-btns">
+      <button id="attr-cancelar" onclick="cerrarAtributos()">Cancelar</button>
+      <button id="attr-agregar" onclick="agregarSeleccion()" disabled>+ Agregar variante</button>
+    </div>
+    <div id="attr-lista-sel" style="margin-top:.75rem"></div>
+    <button id="attr-confirmar" onclick="confirmarAtributos()" disabled
+      style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;margin-top:.75rem;transition:background .15s;">
+      Confirmar y agregar al carrito
+    </button>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbwdA-IjT-Gt3-xYJt-SUG2KrpJdrAEuJmQ-JB-hEJeEs7arf77PcyvS9hpVx-BGoT46/exec";
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbxgvPi7yXmpofHpA5OSkP_PV-Y8kg8J85-WyIgoVAF7jUyFF6quI10Nh8EKIur5Yu9I/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
@@ -516,7 +560,211 @@ function cerrarZoom() {
   document.body.style.overflow = "";
 }
 
-// ── CARGA PRODUCTOS ──────────────────────────────────────────────
+// ── MODAL ATRIBUTOS / VARIANTES FS ──────────────────────────────
+let attrProdActual      = null;
+let attrSelecciones     = []; // array de {seleccion, variante} para múltiples
+let attrSelActual       = {}; // selección en curso {codatributo: idval}
+let attrVarianteActual  = null;
+
+function abrirAtributos(id) {
+  const p = PRODS.find(x => x.id === id);
+  if (!p || !p.variantesFS || !p.variantesFS.length) return;
+  attrProdActual     = p;
+  attrSelecciones    = [];
+  attrSelActual      = {};
+  attrVarianteActual = null;
+
+  document.getElementById("attr-nombre").textContent = p.nombre;
+  document.getElementById("attr-precio").textContent  = "";
+  document.getElementById("attr-info").textContent    = "Selecciona los atributos";
+  document.getElementById("attr-agregar").disabled    = true;
+  document.getElementById("attr-lista-sel").innerHTML = "";
+
+  // Construir grupos de atributos únicos
+  const grupos = {};
+  p.variantesFS.forEach(v => {
+    v.atributos.forEach(a => {
+      if (!grupos[a.codatributo]) grupos[a.codatributo] = { nombre: a.atributo, opciones: [] };
+      if (!grupos[a.codatributo].opciones.find(o => o.idval === a.idval)) {
+        grupos[a.codatributo].opciones.push({ idval: a.idval, valor: a.valor });
+      }
+    });
+  });
+
+  document.getElementById("attr-grupos").innerHTML = Object.entries(grupos).map(([cod, g]) =>
+    `<div class="attr-grupo">
+       <span class="attr-grupo-label">${g.nombre}</span>
+       <div class="attr-opciones">
+         ${g.opciones.map(o =>
+           `<button class="attr-opt" data-cod="${cod}" data-idval="${o.idval}"
+                    onclick="selAtributo('${cod}',${o.idval},this)">
+              ${o.valor}
+            </button>`
+         ).join("")}
+       </div>
+     </div>`
+  ).join("");
+
+  document.getElementById("attr-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+
+function selAtributo(codatributo, idval, el) {
+  attrSelActual[codatributo] = idval;
+  document.querySelectorAll(`.attr-opt[data-cod="${codatributo}"]`)
+    .forEach(b => b.classList.remove("sel"));
+  el.classList.add("sel");
+  buscarVarianteMatcheada();
+}
+
+function buscarVarianteMatcheada() {
+  if (!attrProdActual) return;
+  const variante = attrProdActual.variantesFS.find(v =>
+    Object.entries(attrSelActual).every(([cod, idval]) =>
+      v.atributos.some(a => String(a.codatributo) === String(cod) && a.idval === idval)
+    )
+  );
+  attrVarianteActual = variante || null;
+
+  if (variante) {
+    const precio = Math.round(variante.precio * 0.90 * 100) / 100;
+    document.getElementById("attr-precio").textContent =
+      "RD$" + precio.toLocaleString("es-DO") + " /u";
+    document.getElementById("attr-info").textContent =
+      variante.stockfis <= 0
+        ? "⚠️ Sin stock disponible"
+        : `✓ Ref: ${variante.referencia}`;
+    document.getElementById("attr-agregar").disabled = variante.stockfis <= 0;
+  } else {
+    document.getElementById("attr-precio").textContent = "";
+    document.getElementById("attr-info").textContent   = "Selecciona los atributos";
+    document.getElementById("attr-agregar").disabled   = true;
+  }
+}
+
+function agregarSeleccion() {
+  if (!attrVarianteActual) return;
+  const v      = attrVarianteActual;
+  const attrs  = v.atributos.map(a => a.valor).join(" / ");
+  const precio = Math.round(v.precio * 0.90 * 100) / 100;
+
+  // Verificar si ya está en la lista de selecciones
+  const yaEsta = attrSelecciones.find(s => s.referencia === v.referencia);
+  if (yaEsta) {
+    toast("Ya agregaste esta variante", "err");
+    return;
+  }
+
+  attrSelecciones.push({
+  referencia: v.referencia,
+  attrs,
+  precio,
+  stockfis:   v.stockfis,
+  variante:   v,
+  qty:        1   // ← inicializar en 1
+});
+
+  // Limpiar selección actual para permitir otra
+  attrSelActual      = {};
+  attrVarianteActual = null;
+  document.querySelectorAll(".attr-opt").forEach(b => b.classList.remove("sel"));
+  document.getElementById("attr-precio").textContent = "";
+  document.getElementById("attr-info").textContent   = "Selecciona otra combinación o confirma";
+  document.getElementById("attr-agregar").disabled   = true;
+
+  // Actualizar lista visual de selecciones
+  renderListaSel();
+}
+
+function renderListaSel() {
+  const lista = document.getElementById("attr-lista-sel");
+  if (!attrSelecciones.length) {
+    lista.innerHTML = "";
+    document.getElementById("attr-confirmar").disabled = true;
+    return;
+  }
+  lista.innerHTML = `
+    <div style="font-size:.7rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:.75rem 0 .5rem">
+      Seleccionados (${attrSelecciones.length})
+    </div>
+    ${attrSelecciones.map((s, i) => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--cream);border-radius:8px;margin-bottom:5px;">
+        <span style="flex:1;font-size:.81rem">${s.attrs}<br><small style="color:var(--gold)">RD$${s.precio.toLocaleString("es-DO")}</small></span>
+        <div style="display:flex;align-items:center;gap:5px;background:#fff;border-radius:40px;padding:3px 6px;border:1px solid var(--line)">
+          <button onclick="cambiarCantSel(${i},-1)" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--ink);color:#fff;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;">−</button>
+          <input type="number" min="1" value="${s.qty || 1}"
+            onchange="setCantSel(${i},this.value)"
+            onclick="this.select()"
+            style="width:36px;height:22px;border:1px solid var(--line);border-radius:5px;text-align:center;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;outline:none;padding:0 2px;">
+          <button onclick="cambiarCantSel(${i},1)" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--ink);color:#fff;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;">+</button>
+        </div>
+        <button onclick="quitarSeleccion(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px 5px;">✕</button>
+      </div>`
+    ).join("")}
+  `;
+  document.getElementById("attr-confirmar").disabled = false;
+}
+
+function cambiarCantSel(i, delta) {
+  if (!attrSelecciones[i]) return;
+  const nuevaQty = Math.max(1, (attrSelecciones[i].qty || 1) + delta);
+  attrSelecciones[i].qty = nuevaQty;
+  renderListaSel();
+}
+
+function setCantSel(i, val) {
+  if (!attrSelecciones[i]) return;
+  attrSelecciones[i].qty = Math.max(1, parseInt(val) || 1);
+}
+
+function quitarSeleccion(i) {
+  attrSelecciones.splice(i, 1);
+  renderListaSel();
+  if (!attrSelecciones.length) {
+    document.getElementById("attr-confirmar").disabled = true;
+  }
+}
+
+function confirmarAtributos() {
+  if (!attrProdActual || !attrSelecciones.length) return;
+
+  attrSelecciones.forEach(s => {
+    const key    = s.referencia;
+    const nombre = attrProdActual.nombre + " (" + s.attrs + ")";
+    const qty    = s.qty || 1;
+    const ex     = carrito.find(c => c._key === key);
+    if (ex) { ex.qty += qty; }
+    else {
+      carrito.push({
+        ...attrProdActual,
+        _key:     key,
+        id:       s.referencia,
+        variante: s.attrs,
+        nombre,
+        precio:   s.precio,
+        qty
+      });
+    }
+  });
+
+  const btn = document.getElementById("btn-" + attrProdActual.id);
+  if (btn) { btn.classList.add("done"); btn.textContent = "✓"; }
+  const cnt = document.getElementById("cart-count");
+  cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
+  actualizarPanel();
+  toast(attrSelecciones.length + " variante(s) agregadas ✓");
+  cerrarAtributos();
+}
+
+function cerrarAtributos(e) {
+  if (e && e.target !== document.getElementById("attr-overlay")) return;
+  document.getElementById("attr-overlay").classList.remove("on");
+  document.body.style.overflow = "";
+  attrProdActual     = null;
+  attrSelecciones    = [];
+  attrSelActual      = {};
+  attrVarianteActual = null;
+}// ── CARGA PRODUCTOS ──────────────────────────────────────────────
 async function cargarProductos() {
   try {
     const r    = await fetch(SCRIPT_URL + "?action=productos");
@@ -586,6 +834,7 @@ function renderGrid() {
     const enCarrito = carrito.find(c => c._key === p.id);
     const variantes = p.variantes ? p.variantes.split(",").map(v => v.trim()).filter(Boolean) : [];
     const tieneVar  = variantes.length > 0;
+    const tieneVarFS  = Array.isArray(p.variantesFS) && p.variantesFS.length > 0;
     const agotado   = p.stock === 0;
     const stockBajo = p.stock > 0 && p.stock <= 5;
 
@@ -604,20 +853,25 @@ function renderGrid() {
       : "";
 
     const accionHTML = agotado
-      ? `<button class="add-btn" disabled title="Sin stock">✕</button>`
-      : tieneVar
-        ? `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
-               onclick="abrirVariantes('${p.id}')">
-               ${enCarrito ? "✓" : "+"}
-             </button>`
-        : `<div class="card-qty">
-             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',-1)">−</button>
-             <input class="cq-input" type="number" min="0" value="${enCarrito ? enCarrito.qty : 0}"
-               id="cqv-${p.id}"
-               onchange="setQtyCard('${p.id}',this.value)"
-               onclick="this.select()">
-             <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',1)">+</button>
-           </div>`;
+  ? `<button class="add-btn" disabled title="Sin stock">✕</button>`
+  : tieneVarFS
+    ? `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
+           onclick="abrirAtributos('${p.id}')">
+           ${enCarrito ? "✓" : "+"}
+         </button>`
+    : tieneVar
+      ? `<button class="add-btn ${enCarrito?"done":""}" id="btn-${p.id}"
+             onclick="abrirVariantes('${p.id}')">
+             ${enCarrito ? "✓" : "+"}
+           </button>`
+      : `<div class="card-qty">
+           <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',-1)">−</button>
+           <input class="cq-input" type="number" min="0" value="${enCarrito ? enCarrito.qty : 0}"
+             id="cqv-${p.id}"
+             onchange="setQtyCard('${p.id}',this.value)"
+             onclick="this.select()">
+           <button class="cq-btn" onclick="cambiarQtyCard('${p.id}',1)">+</button>
+         </div>`;
 
     if (vistaActual === "list") {
       return `
