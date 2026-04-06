@@ -690,7 +690,7 @@ function agregarSeleccion() {
   if (!attrVarianteActual) return;
   const v      = attrVarianteActual;
   const attrs  = v.atributos.map(a => a.valor).join(" / ");
-  const precio = Math.round(v.precio * 0.90 * 100) / 100;
+  const precio = Math.round(v.precio);
 
   // Verificar si ya está en la lista de selecciones
   const yaEsta = attrSelecciones.find(s => s.referencia === v.referencia);
