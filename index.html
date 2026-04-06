@@ -671,7 +671,7 @@ function buscarVarianteMatcheada() {
   attrVarianteActual = variante || null;
 
   if (variante) {
-    const precio = Math.round(variante.precio * 0.90 * 100) / 100;
+    const precio = Math.round(variante.precio);
     document.getElementById("attr-precio").textContent =
       "RD$" + precio.toLocaleString("es-DO") + " /u";
     document.getElementById("attr-info").textContent =
