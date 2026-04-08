@@ -49,6 +49,18 @@ body {
   transition: background .3s, color .3s;
 }
 
+.fbtn.on {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* Opcional: hacer que "Todos" tenga otro color */
+.fbtn:nth-child(1).on {
+  background: #7dba8a;   /* verde suave */
+}
+
 /* BANNER */
 #banner {
   background: linear-gradient(90deg, #ffd6a5 0%, #f9c5d8 40%, #e8b4e8 100%);
@@ -826,17 +838,37 @@ async function cargarProductos() {
 
 function construirFiltros() {
   const cats = ["Todos", ...new Set(PRODS.map(p => p.categoria).filter(Boolean))];
-  document.getElementById("filters-bar").innerHTML = cats.map(c =>
-    `<button class="fbtn ${c === "Todos" ? "on" : ""}" onclick="filtrar('${c}')">${c}</button>`
-  ).join("");
+  
+  const html = cats.map(c => {
+    const esTodos = c === "Todos";
+    return `<button class="fbtn ${esTodos ? "on" : ""}" onclick="filtrar('${c}')">${c}</button>`;
+  }).join("");
+  
+  document.getElementById("filters-bar").innerHTML = html;
 }
 
 function filtrar(cat) {
-  catActual = cat;
-  document.querySelectorAll(".fbtn").forEach(b => b.classList.toggle("on", b.textContent === cat));
+  const esMovil = window.innerWidth <= 768;   // Cambia a 620 si prefieres
+
+  if (esMovil) {
+    // === Comportamiento en MÓVIL (con toggle) ===
+    if (catActual === cat) {
+      catActual = "Todos";        // clic de nuevo → mostrar todo
+    } else {
+      catActual = cat;            // mostrar solo esa familia
+    }
+  } else {
+    // === Comportamiento en ESCRITORIO (normal) ===
+    catActual = cat;
+  }
+
+  // Actualizar botones activos
+  document.querySelectorAll(".fbtn").forEach(b => {
+    b.classList.toggle("on", b.textContent === catActual);
+  });
+
   renderGrid();
 }
-
 function buscar(q) { busqueda = q.toLowerCase(); renderGrid(); }
 
 function colorCSS(nombre) {
