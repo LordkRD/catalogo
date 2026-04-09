@@ -49,6 +49,18 @@ body {
   transition: background .3s, color .3s;
 }
 
+.fbtn.on {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* Opcional: hacer que "Todos" tenga otro color */
+.fbtn:nth-child(1).on {
+  background: #7dba8a;   /* verde suave */
+}
+
 /* BANNER */
 #banner {
   background: linear-gradient(90deg, #ffd6a5 0%, #f9c5d8 40%, #e8b4e8 100%);
@@ -364,18 +376,56 @@ body.dark #filters-bar { background: rgba(20,18,26,.95); }
 #confirm-cerrar { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--mint), #5a9e88); color: #fff; border: none; border-radius: 40px; font-family: 'Nunito', sans-serif; font-size: .93rem; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 4px 14px rgba(106,171,142,.35); }
 #confirm-cerrar:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,125,181,.45); }
 
-/* RESPONSIVE */
+/* RESPONSIVE MÓVIL */
 @media (max-width: 620px) {
   #panel { width: 100vw; }
   .p-body { flex-direction: column; }
-  .p-items-col { border-right: none; border-bottom: 1px solid var(--line); max-height: 42vh; }
+  .p-items-col { border-right: none; border-bottom: 1px solid var(--line); max-height: 45vh; }
   .p-form-col { width: 100%; }
-  header, .hero, .grid-wrap { padding-left: 1.1rem; padding-right: 1.1rem; }
-  #filters-bar { padding: 6px 1rem; }
-  #grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); }
-  #grid.list-view { grid-template-columns: 1fr; }
-  #search-wrap { max-width: 180px; }
+  header { padding: 0 .9rem; height: 58px; }
+  .logo { font-size: 1.2rem; }
+  #search-wrap { max-width: 140px; margin: 0 .4rem; }
+  #search { padding: 7px 10px 7px 32px; font-size: .82rem; }
   #share-btn span { display: none; }
+  #share-btn { padding: 7px 10px; }
+  #dark-btn { width: 32px; height: 32px; }
+  .view-btns { display: none; }
+  #cart-btn { padding: 8px 13px; font-size: .82rem; gap: 6px; }
+  #filters-bar { padding: 6px .9rem; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  #filters-bar::-webkit-scrollbar { display: none; }
+  .hero { padding: 1.5rem 1rem 1rem; }
+  .hero h1 { font-size: 1.7rem; margin-bottom: .5rem; }
+  .hero p { font-size: .88rem; }
+  .hero::before { display: none; }
+  .grid-wrap { padding: 0 .9rem 5rem; }
+  #grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  #grid.list-view { grid-template-columns: 1fr; gap: .65rem; }
+  .card-body { padding: .65rem .75rem .8rem; }
+  .card-name { font-size: .88rem; }
+  .card-desc { font-size: .74rem; -webkit-line-clamp: 1; margin-bottom: .4rem; }
+  .card-cat  { font-size: .6rem; margin-bottom: .25rem; }
+  .card-price { font-size: .95rem; }
+  .card-foot { gap: 4px; }
+  .add-btn { width: 33px; height: 33px; font-size: 1.1rem; }
+  .cq-btn { width: 24px; height: 24px; font-size: .85rem; }
+  .cq-input { width: 30px; height: 24px; font-size: .78rem; }
+  .card-qty { padding: 3px 4px; gap: 3px; }
+  .card-variantes { gap: 4px; margin-bottom: .5rem; }
+  .var-dot { width: 14px; height: 14px; }
+  #attr-modal, #var-modal { max-width: 100%; border-radius: 20px 20px 0 0; }
+  #attr-overlay, #var-overlay { align-items: flex-end; padding: 0; }
+  #attr-modal { max-height: 85vh; overflow-y: auto; }
+  #confirm-modal { border-radius: 20px 20px 0 0; max-width: 100%; }
+  #confirm-overlay { align-items: flex-end; padding: 0; }
+  #cart-count { width: 20px; height: 20px; font-size: .68rem; }
+  #banner { font-size: .76rem; padding: 8px 2rem; }
+  #toast { bottom: 1rem; font-size: .8rem; padding: .6rem 1.1rem; }
+}
+@media (max-width: 360px) {
+  #grid { grid-template-columns: repeat(2, 1fr); gap: .55rem; }
+  .card-name { font-size: .82rem; }
+  .card-price { font-size: .88rem; }
+  #search-wrap { max-width: 110px; }
 }
 
 /* MODAL ATRIBUTOS */
@@ -533,7 +583,7 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
     <div class="attr-variante-info" id="attr-info">Selecciona los atributos</div>
     <div class="attr-btns">
       <button id="attr-cancelar" onclick="cerrarAtributos()">Cancelar</button>
-      <button id="attr-agregar" onclick="agregarSeleccion()" disabled>+ Agregar variante</button>
+      <button id="attr-agregar" onclick="agregarSeleccion()" disabled>+ Agregar articulo</button>
     </div>
     <div id="attr-lista-sel" style="margin-top:.75rem"></div>
     <button id="attr-confirmar" onclick="confirmarAtributos()" disabled
@@ -548,7 +598,7 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbz-gLL5vKTWTF4mE875Nv5w0STpKOgD1dMI6-gZj4JdDAGwrFQwBSMrgK8NlBrP4vaS/exec";
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbyNojfom5qla2aly-7uTMvTPkJwP-MSrPvDioge1PvfJ03icxMptgUih1W3oMDpy_N9/exec";
 //const SCRIPT_URL   ="  https://script.google.com/macros/s/AKfycbx9W-Du0ZtKSiVPM9Fc4yUJ4ED6tZMsQwG2Rk2euw6hu2LBafAJvFz5kijsTeoPi1K9/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
@@ -696,7 +746,7 @@ function agregarSeleccion() {
   // Verificar si ya está en la lista de selecciones
   const yaEsta = attrSelecciones.find(s => s.referencia === v.referencia);
   if (yaEsta) {
-    toast("Ya agregaste esta variante", "err");
+    toast("Ya agregaste este articulo", "err");
     return;
   }
 
@@ -826,14 +876,35 @@ async function cargarProductos() {
 
 function construirFiltros() {
   const cats = ["Todos", ...new Set(PRODS.map(p => p.categoria).filter(Boolean))];
-  document.getElementById("filters-bar").innerHTML = cats.map(c =>
-    `<button class="fbtn ${c === "Todos" ? "on" : ""}" onclick="filtrar('${c}')">${c}</button>`
-  ).join("");
+  
+  const html = cats.map(c => {
+    const esTodos = c === "Todos";
+    return `<button class="fbtn ${esTodos ? "on" : ""}" onclick="filtrar('${c}')">${c}</button>`;
+  }).join("");
+  
+  document.getElementById("filters-bar").innerHTML = html;
 }
 
 function filtrar(cat) {
-  catActual = cat;
-  document.querySelectorAll(".fbtn").forEach(b => b.classList.toggle("on", b.textContent === cat));
+  const esMovil = window.innerWidth <= 768;   // ← Puedes cambiar a 620 si prefieres
+
+  if (esMovil) {
+    // Comportamiento en MÓVIL: selección única con toggle
+    if (catActual === cat) {
+      catActual = "Todos";        // clic de nuevo → mostrar todo
+    } else {
+      catActual = cat;            // activar solo esta categoría
+    }
+  } else {
+    // Comportamiento normal en escritorio
+    catActual = cat;
+  }
+
+  // Actualizar visual de los botones (solo uno activo)
+  document.querySelectorAll(".fbtn").forEach(b => {
+    b.classList.toggle("on", b.textContent === catActual);
+  });
+
   renderGrid();
 }
 
