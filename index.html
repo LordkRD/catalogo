@@ -267,12 +267,22 @@ body.dark #filters-bar { background: rgba(20,18,26,.95); }
 .cq-input:focus { border-color: var(--accent); }
 
 /* ZOOM */
-#zoom-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(20,18,26,.92); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; align-items: center; justify-content: center; cursor: zoom-out; padding: 1rem; }
+#zoom-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(20,18,26,.92); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .25s; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }
 #zoom-overlay.on { opacity: 1; pointer-events: all; }
-#zoom-img { max-width: 90vw; max-height: 88vh; border-radius: 16px; object-fit: contain; transform: scale(.9); transition: transform .3s cubic-bezier(.4,0,.2,1); display: block; }
+#zoom-img { max-width: 90vw; max-height: 70vh; border-radius: 16px; object-fit: contain; transform: scale(.9); transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .18s; display: block; cursor: default; }
 #zoom-overlay.on #zoom-img { transform: scale(1); }
-#zoom-close { position: absolute; top: 1.2rem; right: 1.2rem; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background .15s; backdrop-filter: blur(4px); }
+#zoom-close { position: absolute; top: 1.2rem; right: 1.2rem; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background .15s; backdrop-filter: blur(4px); z-index: 2; }
 #zoom-close:hover { background: rgba(255,255,255,.28); }
+#zoom-prev, #zoom-next { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; border: none; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: background .15s; backdrop-filter: blur(4px); z-index: 2; }
+#zoom-prev { left: 1.2rem; }
+#zoom-next { right: 1.2rem; }
+#zoom-prev:hover, #zoom-next:hover { background: rgba(255,255,255,.28); }
+#zoom-prev.oculto, #zoom-next.oculto { opacity: 0; pointer-events: none; }
+#zoom-thumbs { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; justify-content: center; max-width: 90vw; }
+.zoom-thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2.5px solid transparent; transition: border-color .18s, transform .18s, opacity .18s; opacity: .55; flex-shrink: 0; }
+.zoom-thumb:hover { opacity: .85; transform: scale(1.06); }
+.zoom-thumb.sel { border-color: var(--accent); opacity: 1; }
+#zoom-counter { position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,.15); color: #fff; font-size: .75rem; font-weight: 700; padding: 4px 14px; border-radius: 40px; backdrop-filter: blur(4px); letter-spacing: .04em; white-space: nowrap; }
 
 /* OVERLAY */
 #overlay { position: fixed; inset: 0; z-index: 200; background: rgba(20,18,26,.45); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .3s; }
@@ -501,9 +511,13 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
 </div>
 
 <!-- ZOOM -->
-<div id="zoom-overlay" onclick="cerrarZoom()">
+<div id="zoom-overlay" onclick="zoomClickFondo(event)">
   <button id="zoom-close" onclick="cerrarZoom()">✕</button>
+  <button id="zoom-prev" onclick="event.stopPropagation();zoomNav(-1)">‹</button>
+  <button id="zoom-next" onclick="event.stopPropagation();zoomNav(1)">›</button>
   <img id="zoom-img" src="" alt="">
+  <div id="zoom-thumbs"></div>
+  <div id="zoom-counter"></div>
 </div>
 
 <div id="overlay" onclick="cerrarCarrito()"></div>
@@ -598,7 +612,7 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbyNojfom5qla2aly-7uTMvTPkJwP-MSrPvDioge1PvfJ03icxMptgUih1W3oMDpy_N9/exec";
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbzoFoJZQwgmpvmxKg_Ba9D--0nkXqwJtK7LQdNT74mD3s_XEC9xYrqSdMdv6VH-Pg8/exec";
 //const SCRIPT_URL   ="  https://script.google.com/macros/s/AKfycbx9W-Du0ZtKSiVPM9Fc4yUJ4ED6tZMsQwG2Rk2euw6hu2LBafAJvFz5kijsTeoPi1K9/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
@@ -643,16 +657,65 @@ function setVista(v) {
   renderGrid();
 }
 
-// ── ZOOM ─────────────────────────────────────────────────────────
-function abrirZoom(src, alt) {
-  document.getElementById("zoom-img").src = src;
-  document.getElementById("zoom-img").alt = alt;
+// ── ZOOM CON CARRUSEL ────────────────────────────────────────────
+let zoomImagenes = [];
+let zoomIdx = 0;
+
+function abrirZoom(src, alt, imagenes) {
+  zoomImagenes = (imagenes && imagenes.length > 0) ? imagenes : [src];
+  zoomIdx = zoomImagenes.indexOf(src);
+  if (zoomIdx < 0) zoomIdx = 0;
+  renderZoom();
   document.getElementById("zoom-overlay").classList.add("on");
   document.body.style.overflow = "hidden";
 }
+
+function renderZoom() {
+  const img = document.getElementById("zoom-img");
+  img.style.opacity = "0";
+  setTimeout(() => {
+    img.src = zoomImagenes[zoomIdx];
+    img.style.opacity = "1";
+  }, 100);
+
+  // Contador
+  const counter = document.getElementById("zoom-counter");
+  counter.textContent = zoomImagenes.length > 1 ? `${zoomIdx + 1} / ${zoomImagenes.length}` : "";
+
+  // Flechas
+  document.getElementById("zoom-prev").classList.toggle("oculto", zoomIdx === 0);
+  document.getElementById("zoom-next").classList.toggle("oculto", zoomIdx === zoomImagenes.length - 1);
+
+  // Miniaturas
+  const thumbsEl = document.getElementById("zoom-thumbs");
+  if (zoomImagenes.length <= 1) {
+    thumbsEl.innerHTML = "";
+  } else {
+    thumbsEl.innerHTML = zoomImagenes.map((url, i) =>
+      `<img class="zoom-thumb ${i === zoomIdx ? "sel" : ""}" src="${url}"
+            onclick="event.stopPropagation();zoomIr(${i})">`
+    ).join("");
+  }
+}
+
+function zoomNav(delta) {
+  zoomIdx = Math.max(0, Math.min(zoomImagenes.length - 1, zoomIdx + delta));
+  renderZoom();
+}
+
+function zoomIr(i) {
+  zoomIdx = i;
+  renderZoom();
+}
+
+function zoomClickFondo(e) {
+  if (e.target === document.getElementById("zoom-overlay")) cerrarZoom();
+}
+
 function cerrarZoom() {
   document.getElementById("zoom-overlay").classList.remove("on");
   document.body.style.overflow = "";
+  zoomImagenes = []; zoomIdx = 0;
 }
 
 // ── MODAL ATRIBUTOS / VARIANTES FS ──────────────────────────────
@@ -955,8 +1018,9 @@ function renderGrid() {
     const stockBajo = p.stock > 0 && p.stock <= 5;
 
     const imgSrc = p.imagen || "";
+    const imgAll = JSON.stringify(p.imagenes && p.imagenes.length > 0 ? p.imagenes : (imgSrc ? [imgSrc] : []));
     const imgEl  = imgSrc
-      ? `<div class="card-img-wrap" ${agotado ? "" : `onclick="abrirZoom('${imgSrc}','${p.nombre.replace(/'/g,"\\'")}')"`} style="${agotado?"cursor:default":""}">
+      ? `<div class="card-img-wrap" ${agotado ? "" : `onclick="abrirZoom('${imgSrc}','${p.nombre.replace(/'/g,"\\'")}',${imgAll.replace(/"/g,"'")}${")"}"`} style="${agotado?"cursor:default":""}">
            <img class="card-img" src="${imgSrc}" alt="${p.nombre}" loading="lazy"
                 onerror="this.parentElement.outerHTML='<div class=card-ph>🛍️</div>'">
            ${agotado ? '<div class="badge-agotado"><span>Agotado</span></div>' : ""}
@@ -1344,7 +1408,10 @@ function toast(msg, tipo = "") {
 }
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { cerrarZoom(); cerrarConfirm(); }
+  const zoomAbierto = document.getElementById("zoom-overlay").classList.contains("on");
+  if (e.key === "Escape")      { cerrarZoom(); cerrarConfirm(); }
+  if (e.key === "ArrowLeft"  && zoomAbierto) zoomNav(-1);
+  if (e.key === "ArrowRight" && zoomAbierto) zoomNav(1);
 });
 
 cargarProductos();
