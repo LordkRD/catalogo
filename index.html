@@ -612,8 +612,7 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
 // ════════════════════════════════════════════════════════════════
 //  ⚙️  EDITA ESTAS LÍNEAS
 // ════════════════════════════════════════════════════════════════
-const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbzoFoJZQwgmpvmxKg_Ba9D--0nkXqwJtK7LQdNT74mD3s_XEC9xYrqSdMdv6VH-Pg8/exec";
-//const SCRIPT_URL   ="  https://script.google.com/macros/s/AKfycbx9W-Du0ZtKSiVPM9Fc4yUJ4ED6tZMsQwG2Rk2euw6hu2LBafAJvFz5kijsTeoPi1K9/exec";
+const SCRIPT_URL   ="https://script.google.com/macros/s/AKfycbxhY25nrOaY2O4zT3uB_KT69Q4etdN2Mb_5aQNPFSqeKu3YtteGNVv_Qc3q59vEdDSM/exec";
 const BANNER_TEXTO = "🎉 ¡Bienvenido a nuestro catálogo! Escríbenos por WhatsApp para más información.";
 const CATALOGO_URL = window.location.href;
 // ════════════════════════════════════════════════════════════════
@@ -938,18 +937,27 @@ async function cargarProductos() {
 }
 
 function construirFiltros() {
-  const cats = ["Todos", ...new Set(PRODS.map(p => p.categoria).filter(Boolean))];
-  
+  // Obtener categorías normales (excluyendo las que ya son "Agotados" si existiera)
+  const categoriasNormales = [...new Set(
+    PRODS.filter(p => !p.esAgotado).map(p => p.categoria).filter(Boolean)
+  )];
+
+  const cats = ["Todos", ...categoriasNormales, "Agotados"];
+
   const html = cats.map(c => {
     const esTodos = c === "Todos";
-    return `<button class="fbtn ${esTodos ? "on" : ""}" onclick="filtrar('${c}')">${c}</button>`;
+    const esAgotados = c === "Agotados";
+    
+    let claseExtra = "";
+    if (esAgotados) claseExtra = " style='background:#fee2e2; color:#991b1b; border-color:#f87171;'";
+    
+    return `<button class="fbtn ${esTodos ? "on" : ""}" onclick="filtrar('${c}')" ${esAgotados ? claseExtra : ""}>${c}</button>`;
   }).join("");
-  
+
   document.getElementById("filters-bar").innerHTML = html;
 }
-
 function filtrar(cat) {
-  const esMovil = window.innerWidth <= 768;   // ← Puedes cambiar a 620 si prefieres
+  const esMovil = window.innerWidth <= 620;   // ← Puedes cambiar a 620 si prefieres
 
   if (esMovil) {
     // Comportamiento en MÓVIL: selección única con toggle
@@ -997,7 +1005,15 @@ function renderGrid() {
   grid.style.display = "grid";
   grid.classList.toggle("list-view", vistaActual === "list");
 
-  let lista = catActual === "Todos" ? PRODS : PRODS.filter(p => p.categoria === catActual);
+let lista;
+if (catActual === "Todos") {
+  lista = PRODS;
+} else if (catActual === "Agotados") {
+  lista = PRODS.filter(p => p.esAgotado === true);
+} else {
+  lista = PRODS.filter(p => p.categoria === catActual && !p.esAgotado);
+} 
+
   if (busqueda) lista = lista.filter(p =>
     p.nombre.toLowerCase().includes(busqueda) ||
     (p.descripcion || "").toLowerCase().includes(busqueda)
