@@ -535,7 +535,10 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
         <div class="s-row"><span>Artículos</span><span id="s-cnt">0</span></div>
         <div class="s-total"><span>Total</span><span class="t-price" id="s-tot">RD$0</span></div>
       </div>
-    </div>
+<button onclick="vaciarCarrito()" 
+        style="margin-top:12px; width:100%; padding:11px; background:#fee2e2; color:#991b1b; border:none; border-radius:12px; font-weight:600; cursor:pointer;">
+  🗑️ Vaciar carrito
+</button>    </div>
     <div class="p-form-col">
       <div class="p-col-title">Datos del cliente</div>
       <form id="cform" onsubmit="return false">
@@ -622,6 +625,28 @@ let carrito     = [];
 let catActual   = "Todos";
 let busqueda    = "";
 let vistaActual = "grid";
+
+// ── PERSISTENCIA DEL CARRITO ─────────────────────────────────────
+function guardarCarrito() {
+  try { localStorage.setItem("carrito_djd", JSON.stringify(carrito)); } catch(e) {}
+}
+function cargarCarrito() {
+  try {
+    const g = localStorage.getItem("carrito_djd");
+    carrito = g ? JSON.parse(g) : [];
+  } catch(e) { carrito = []; }
+}
+function vaciarCarrito() {   // ← Cambié el nombre a vaciarCarrito (más claro)
+  if (confirm("¿Estás seguro de que deseas vaciar todo el carrito?")) {
+    carrito = [];
+    try {
+      localStorage.removeItem("carrito_djd");
+    } catch(e) {}
+    actualizarPanel();
+    renderGrid();           // Actualiza las tarjetas (para quitar los ✓)
+    toast("Carrito vaciado correctamente", "err");
+  }
+}
 
 // ── BANNER ───────────────────────────────────────────────────────
 document.getElementById("banner-text").textContent = BANNER_TEXTO;
@@ -910,6 +935,7 @@ function confirmarAtributos() {
   cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
   actualizarPanel();
   toast(attrSelecciones.length + " variante(s) agregadas ✓");
+  guardarCarrito();
   cerrarAtributos();
 }
 
@@ -1121,6 +1147,7 @@ function agregar(id, variante) {
   const cnt = document.getElementById("cart-count");
   cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
   actualizarPanel();
+  guardarCarrito();
   toast((variante ? p.nombre + " (" + variante + ")" : p.nombre) + " agregado ✓");
 }
 
@@ -1148,6 +1175,7 @@ function cambiarQtyCard(id, delta) {
   const cnt = document.getElementById("cart-count");
   cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
   actualizarPanel();
+  guardarCarrito();
 }
 
 function setQtyCard(id, val) {
@@ -1173,6 +1201,7 @@ function setQtyCard(id, val) {
   const cnt = document.getElementById("cart-count");
   cnt.classList.remove("pop"); void cnt.offsetWidth; cnt.classList.add("pop");
   actualizarPanel();
+  guardarCarrito();
 }
 
 // ── CAMBIAR CANTIDAD EN CARRITO ──────────────────────────────────
@@ -1188,6 +1217,7 @@ function cambiarQty(key, delta) {
     renderGrid();
   }
   actualizarPanel();
+  guardarCarrito();
 }
 
 // ── PANEL CARRITO ────────────────────────────────────────────────
@@ -1363,7 +1393,7 @@ async function checkout() {
     if (!data.ok) throw new Error(data.error || "Error desconocido");
 
     mostrarConfirm(data.id, payload);
-    carrito = [];
+    limpiarCarrito();
     actualizarPanel();
     cerrarCarrito();
     renderGrid();
@@ -1429,7 +1459,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft"  && zoomAbierto) zoomNav(-1);
   if (e.key === "ArrowRight" && zoomAbierto) zoomNav(1);
 });
-
+cargarCarrito(); // cargar al iniciar
 cargarProductos();
 actualizarPanel();
 </script>
