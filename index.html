@@ -61,6 +61,72 @@ body {
   background: #7dba8a;   /* verde suave */
 }
 
+/* MODAL CONFIRMACIÓN MEJORADO - Área de items al 95% */
+#confirm-overlay {
+  position: fixed; 
+  inset: 0; 
+  z-index: 400; 
+  background: rgba(20,18,26,.8); 
+  backdrop-filter: blur(8px); 
+  opacity: 0; 
+  pointer-events: none; 
+  transition: opacity .3s; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 1rem;
+}
+#confirm-overlay.on { 
+  opacity: 1; 
+  pointer-events: all; 
+}
+
+#confirm-modal {
+  background: var(--paper); 
+  border-radius: 28px; 
+  padding: 2rem 1.8rem; 
+  width: 100%; 
+  max-width: 540px;           /* Modal más ancho */
+  max-height: 92vh;
+  box-shadow: 0 25px 70px rgba(20,18,26,.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Área de items ocupa el 95% del espacio disponible */
+.confirm-items-scroll {
+  flex: 1;                    /* Ocupa todo el espacio disponible */
+  overflow-y: auto;
+  background: var(--cream);
+  border-radius: 16px;
+  padding: 1.1rem;
+  margin: 1.2rem 0;
+  border: 1px solid var(--line);
+  max-height: 95%;            /* ← 95% del modal */
+}
+
+/* Estilo de cada item */
+.confirm-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.confirm-item:last-child { 
+  border-bottom: none; 
+}
+
+.confirm-total {
+  font-size: 1.15rem; 
+  font-weight: 800; 
+  color: var(--accent); 
+  text-align: right;
+  margin-top: 8px;
+}
+
 /* BANNER */
 #banner {
   background: linear-gradient(90deg, #ffd6a5 0%, #f9c5d8 40%, #e8b4e8 100%);
@@ -88,6 +154,7 @@ header {
   padding: 0 1.75rem; height: 66px;
   display: flex; align-items: center; justify-content: space-between;
   transition: background .3s;
+
 }
 body.dark header { background: rgba(20,18,26,.92); }
 .logo { font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700; letter-spacing: -.025em; }
@@ -155,12 +222,29 @@ body.dark #filters-bar { background: rgba(20,18,26,.95); }
 #cart-btn:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,133,90,.45); }
 #cart-btn:active { transform: scale(.97); }
 #cart-count {
-  background: #fff; color: var(--accent); border-radius: 50%;
-  width: 22px; height: 22px; font-size: .72rem; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
+  background: #fff; 
+  color: var(--accent); 
+  border-radius: 9999px;
+  font-size: .72rem; 
+  font-weight: 800; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  min-width: 22px; 
+  height: 22px;
+  padding: 0 6px;           /* Permite crecer horizontalmente */
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(232,133,90,.3);
 }
-#cart-count.pop { animation: pop .25s ease; }
-@keyframes pop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
+
+#cart-count.pop { 
+  animation: pop .25s ease; 
+}
+
+@keyframes pop { 
+  0%,100%{transform:scale(1)} 
+  50%{transform:scale(1.45)} 
+}
 
 /* HERO */
 .hero { padding: 3.5rem 2rem 1.5rem; max-width: 900px; margin: 0 auto; position: relative; }
@@ -481,26 +565,38 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
     <input id="search" type="text" placeholder="Buscar producto..." oninput="buscar(this.value)">
   </div>
   <div class="header-actions">
-    <button id="dark-btn" onclick="toggleDark()" title="Modo oscuro">
-      <svg id="dark-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    </button>
-    <button id="share-btn" onclick="compartirCatalogo()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      <span>Compartir</span>
-    </button>
-    <div class="view-btns">
-      <button class="vbtn on" id="vbtn-grid" onclick="setVista('grid')" title="Cuadrícula">
-        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
-      </button>
-      <button class="vbtn" id="vbtn-list" onclick="setVista('list')" title="Lista">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
-      </button>
-    </div>
-    <button id="cart-btn" onclick="abrirCarrito()">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-      Carrito <div id="cart-count">0</div>
-    </button>
-  </div>
+  <!-- Botón Modo Oscuro -->
+  <button id="dark-btn" onclick="toggleDark()" title="Modo oscuro">
+    <svg id="dark-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    </svg>
+  </button>
+
+  <!-- Botón Compartir -->
+  <button id="share-btn" onclick="compartirCatalogo()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="#25d366">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+    <span>Compartir</span>
+  </button>
+
+  <!-- NUEVO: Botón Login -->
+  <button id="login-btn" onclick="abrirLogin()" 
+          style="padding:8px 16px; border-radius:40px; border:1.5px solid var(--line); background:transparent; font-weight:600; font-size:0.85rem; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px;">
+    👤 Iniciar sesión
+  </button>
+
+  <!-- Vista Grid/List -->
+  <div class="view-btns">...</div>
+
+  <!-- Carrito -->
+  <button id="cart-btn" onclick="abrirCarrito()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/>
+    </svg>
+    Carrito <div id="cart-count">0</div>
+  </button>
+</div>
 </header>
 <div id="filters-bar"></div>
 </div>
@@ -579,18 +675,26 @@ body::after  { width: 400px; height: 400px; bottom: -100px; left: -100px; backgr
   </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN DE PEDIDO -->
-<div id="confirm-overlay">
+<!-- MODAL CONFIRMACIÓN DE PEDIDO (Más ancho + Scroll) -->
+<div id="confirm-overlay" onclick="cerrarConfirm(event)">
   <div id="confirm-modal">
-    <div class="confirm-icon">🎉</div>
-    <h2>¡Pedido confirmado!</h2>
+    <h1>¡Pedido confirmado!</h1>
     <p>Tu pedido ha sido recibido. Te contactaremos pronto.</p>
+    
     <div class="confirm-id" id="confirm-id">PED-00000</div>
-    <div class="confirm-items" id="confirm-items"></div>
-    <button id="confirm-cerrar" onclick="cerrarConfirm()" style="margin-top:1.25rem">¡Listo! 🌸</button>
+    
+    <!-- Contenedor con scroll -->
+    <div class="confirm-items-scroll" id="confirm-items">
+      <!-- Los items se generan con JavaScript -->
+    </div>
+
+    <div class="confirm-total" id="confirm-total">Total: RD$0</div>
+
+    <button id="confirm-cerrar" onclick="cerrarConfirm()" style="margin-top:1.25rem">
+      ¡Listo! 🌸
+    </button>
   </div>
 </div>
-
 <!-- MODAL ATRIBUTOS / VARIANTES -->
 <div id="attr-overlay" onclick="cerrarAtributos(event)">
   <div id="attr-modal">
@@ -1223,7 +1327,30 @@ function cambiarQty(key, delta) {
 // ── PANEL CARRITO ────────────────────────────────────────────────
 function actualizarPanel() {
   const totalUnd = carrito.reduce((s, c) => s + c.qty, 0);
-  document.getElementById("cart-count").textContent = totalUnd;
+  
+  const countEl = document.getElementById("cart-count");
+  
+  // Actualizar el número
+  countEl.textContent = totalUnd;
+
+  // Auto-ajuste según cantidad de dígitos
+  if (totalUnd >= 10000) {
+    countEl.style.fontSize = "0.62rem";
+    countEl.style.minWidth = "26px";
+    countEl.style.padding = "0 7px";
+  } 
+  else if (totalUnd >= 1000) {
+    countEl.style.fontSize = "0.66rem";
+    countEl.style.minWidth = "24px";
+    countEl.style.padding = "0 6px";
+  } 
+  else {
+    countEl.style.fontSize = "0.72rem";
+    countEl.style.minWidth = "22px";
+    countEl.style.padding = "0 5px";
+  }
+
+  // Actualizar el contenido del carrito
   const wrap = document.getElementById("citems");
   if (!carrito.length) {
     wrap.innerHTML = `<div class="c-empty"><div class="c-empty-ico">🛒</div><span>Tu carrito está vacío</span></div>`;
@@ -1249,12 +1376,12 @@ function actualizarPanel() {
       </div>`;
     }).join("");
   }
+
   const sub = carrito.reduce((s, c) => s + c.precio * c.qty, 0);
   document.getElementById("s-sub").textContent = "RD$" + sub.toLocaleString("es-DO");
   document.getElementById("s-cnt").textContent = totalUnd + " art.";
   document.getElementById("s-tot").textContent = "RD$" + sub.toLocaleString("es-DO");
 }
-
 // ── VARIANTES ────────────────────────────────────────────────────
 let varProdActual = null, varColoresActuales = [];
 
@@ -1420,11 +1547,26 @@ async function checkout() {
 // ── MODAL CONFIRMACIÓN ───────────────────────────────────────────
 function mostrarConfirm(id, payload) {
   document.getElementById("confirm-id").textContent = id;
-  document.getElementById("confirm-items").innerHTML =
-    payload.items.map(i =>
-      `<div class="confirm-item">${i.nombre} x${i.qty} — RD$${Number(i.subtotal).toLocaleString("es-DO")}</div>`
-    ).join("") +
-    `<div class="confirm-total">Total: RD$${Number(payload.total).toLocaleString("es-DO")}</div>`;
+
+  const itemsContainer = document.getElementById("confirm-items");
+  let html = "";
+
+  payload.items.forEach(i => {
+    html += `
+      <div class="confirm-item">
+        ${i.nombre} ×${i.qty} 
+        <span style="float:right; color:var(--accent); font-weight:600;">
+          RD$${Number(i.subtotal).toLocaleString("es-DO")}
+        </span>
+      </div>`;
+  });
+
+  itemsContainer.innerHTML = html;
+
+  document.getElementById("confirm-total").innerHTML = `
+    Total: <strong>RD$${Number(payload.total).toLocaleString("es-DO")}</strong>
+  `;
+
   document.getElementById("confirm-overlay").classList.add("on");
   document.body.style.overflow = "hidden";
 }
@@ -1459,6 +1601,17 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft"  && zoomAbierto) zoomNav(-1);
   if (e.key === "ArrowRight" && zoomAbierto) zoomNav(1);
 });
+
+// ── BOTÓN LOGIN ──────────────────────────────────────────────────
+function abrirLogin() {
+  alert("🔐 Función de Login en desarrollo.\n\nPronto podrás iniciar sesión con tu cuenta de cliente.");
+  
+  // Aquí puedes poner tu lógica futura:
+  // Ejemplo: abrir un modal de login, redirigir a página, etc.
+  
+  // Si ya tienes un sistema de login, puedes reemplazar el alert por:
+  // window.location.href = "https://djd.ciguadr.com/login";
+}
 cargarCarrito(); // cargar al iniciar
 cargarProductos();
 actualizarPanel();
